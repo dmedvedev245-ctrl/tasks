@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Центр задач</title>
+<meta name="theme-color" content="#0e1422">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Задачи">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1422; --surface:#161e30; --surface2:#1d2740; --line:#26314d;
+  --text:#e7ecf5; --muted:#8a96ad; --faint:#5d6984;
+  --accent:#6c8cff; --accent2:#4f6fe8; --red:#ff6b6b; --amber:#f5b84c; --green:#4cc38a; --violet:#a78bfa;
+  --r:14px; --sb:env(safe-area-inset-bottom,0px); --st:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px}
+body{min-height:100dvh;overscroll-behavior-y:contain}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+.app{max-width:680px;margin:0 auto;padding:calc(var(--st) + 14px) 16px calc(var(--sb) + 96px)}
+
+.hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.hdr .back{width:36px;height:36px;border-radius:10px;background:var(--surface);display:grid;place-items:center;flex:none}
+.hdr h1{font-size:26px;font-weight:800;margin:0;letter-spacing:-.02em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdr .sub{font-size:13px;color:var(--muted);font-weight:500;margin-top:2px}
+.icon-btn{width:38px;height:38px;border-radius:12px;background:var(--surface);display:grid;place-items:center;flex:none;color:var(--muted)}
+.icon-btn:active{background:var(--surface2)}
+.icon-btn svg,.back svg{width:20px;height:20px}
+.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--faint);display:inline-block;margin-right:6px;vertical-align:middle}
+.sync-dot.on{background:var(--green)} .sync-dot.err{background:var(--red)}
+
+.quick{display:flex;gap:8px;margin-bottom:18px}
+.quick input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;outline:none}
+.quick input:focus{border-color:var(--accent)}
+.quick button{background:var(--accent);color:#fff;border-radius:var(--r);padding:0 16px;font-weight:700}
+
+.sec{margin:20px 0 8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sec .n{background:var(--surface2);color:var(--muted);border-radius:20px;padding:1px 8px;font-size:12px;letter-spacing:0}
+.sec.red{color:var(--red)} .sec.amber{color:var(--amber)} .sec.accent{color:var(--accent)}
+.sec .toggle{margin-left:auto;font-size:12px;text-transform:none;letter-spacing:0;color:var(--faint)}
+.list{display:flex;flex-direction:column;gap:6px}
+.task{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border-radius:var(--r);padding:12px 14px;border-left:3px solid transparent;transition:opacity .2s}
+.task.p1{border-left-color:var(--red)} .task.p3{opacity:.85}
+.task.done{opacity:.5} .task.done .ttl{text-decoration:line-through;color:var(--muted)}
+.chk{width:24px;height:24px;border-radius:50%;border:2px solid var(--faint);flex:none;margin-top:1px;display:grid;place-items:center}
+.task.p1 .chk{border-color:var(--red)}
+.task.done .chk{background:var(--green);border-color:var(--green)}
+.task.done .chk::after{content:"";width:6px;height:11px;border:solid #0e1422;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.tbody{flex:1;min-width:0;cursor:pointer}
+.ttl{font-weight:600;line-height:1.35;word-wrap:break-word}
+.note{font-size:13px;color:var(--muted);margin-top:3px;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted);display:inline-flex;align-items:center;gap:4px}
+.chip.red{color:var(--red);background:rgba(255,107,107,.12)}
+.chip.amber{color:var(--amber);background:rgba(245,184,76,.12)}
+.chip.accent{color:var(--accent);background:rgba(108,140,255,.14)}
+.chip.violet{color:var(--violet);background:rgba(167,139,250,.14)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.empty{text-align:center;color:var(--muted);padding:36px 16px;background:var(--surface);border-radius:var(--r);font-size:15px;line-height:1.5}
+.empty b{display:block;font-size:28px;margin-bottom:6px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.stat{background:var(--surface);border-radius:var(--r);padding:12px}
+.stat .v{font-size:24px;font-weight:800} .stat .l{font-size:12px;color:var(--muted);font-weight:600}
+.stat.red .v{color:var(--red)} .stat.accent .v{color:var(--accent)} .stat.green .v{color:var(--green)}
+
+.search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;outline:none;margin-bottom:14px}
+.search:focus{border-color:var(--accent)}
+.areas{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.area{background:var(--surface);border-radius:var(--r);padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;min-height:110px}
+.area::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c)}
+.area .em{font-size:24px}
+.area .nm{font-weight:700;font-size:16px;line-height:1.2}
+.area .cnt{font-size:13px;color:var(--muted);margin-top:auto}
+.area .cnt .r{color:var(--red);font-weight:700}
+.area:active{background:var(--surface2)}
+.bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c)}
+
+.nav{position:fixed;left:0;right:0;bottom:0;background:rgba(14,20,34,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 8px calc(var(--sb) + 6px);z-index:10}
+.nav-in{max-width:680px;margin:0 auto;display:flex;align-items:center}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--faint);padding:6px 0;position:relative}
+.nav button svg{width:22px;height:22px}
+.nav button.on{color:var(--accent)}
+.nav .badge{position:absolute;top:2px;left:calc(50% + 6px);background:var(--red);color:#fff;font-size:10px;border-radius:10px;padding:0 5px;line-height:16px;min-width:16px}
+.fab{width:54px;height:54px;border-radius:18px;background:var(--accent);color:#fff;display:grid;place-items:center;margin:-22px 6px 0;box-shadow:0 8px 24px rgba(108,140,255,.4);flex:none}
+.fab svg{width:26px;height:26px}
+
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.backdrop.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);max-height:92dvh;display:flex;justify-content:center}
+.sheet.show{transform:none}
+.sheet-in{background:var(--surface);width:100%;max-width:680px;border-radius:22px 22px 0 0;padding:10px 18px calc(var(--sb) + 18px);overflow-y:auto;max-height:92dvh}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 14px}
+.sheet h2{margin:0 0 14px;font-size:20px;font-weight:800}
+.sheet h3{margin:22px 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.fld{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;outline:none;margin-bottom:10px}
+.fld:focus{border-color:var(--accent)}
+textarea.fld{min-height:76px;resize:vertical}
+.fld.big{font-size:18px;font-weight:600}
+.lbl{font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.picks{display:flex;flex-wrap:wrap;gap:6px}
+.pick{padding:7px 12px;border-radius:20px;background:var(--bg);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.pick.on{background:rgba(108,140,255,.16);border-color:var(--accent);color:var(--text)}
+.pick input[type=date]{background:none;border:0;outline:none;color:inherit;font-size:14px;width:130px;padding:0}
+.pick input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
+.row{display:flex;gap:8px;margin-top:20px}
+.btn{flex:1;padding:14px;border-radius:14px;font-weight:700;background:var(--surface2);text-align:center}
+.btn.pri{background:var(--accent);color:#fff}
+.btn.danger{color:var(--red);flex:0 0 auto;padding:14px 18px}
+.btn.sm{flex:0 0 auto;padding:10px 14px;font-size:14px}
+.btn:disabled{opacity:.5}
+.hint{font-size:13px;color:var(--muted);line-height:1.5;margin:6px 0 10px}
+.hint code{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:12px}
+.status-box{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;display:flex;align-items:center}
+.arow{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.arow .fld{margin:0}
+.arow .em-in{width:52px;text-align:center;padding:10px 4px;flex:none}
+.arow input[type=color]{width:40px;height:42px;border:0;background:none;padding:0;flex:none}
+.arow .del{width:40px;height:42px;border-radius:10px;background:var(--bg);color:var(--red);flex:none;font-size:18px}
+pre.code{background:var(--bg);border-radius:12px;padding:12px;font-size:11.5px;line-height:1.45;max-height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px;color:#b9c3d9}
+.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 90px);transform:translateX(-50%) translateY(20px);background:#26314d;color:var(--text);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:.2s;z-index:40;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.err{background:#4a2330}
+.modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.6)}
+.modal.show{display:flex}
+.modal-in{background:var(--surface);border-radius:18px;padding:20px;max-width:360px;width:100%}
+.modal-in p{margin:0 0 4px;font-weight:600;line-height:1.45}
+.day-h{display:flex;align-items:baseline;gap:8px}
+.day-h small{font-weight:600;color:var(--faint);text-transform:none;letter-spacing:0}
+@media (min-width:560px){.areas{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<nav class="nav"><div class="nav-in" id="nav"></div></nav>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet"><div class="sheet-in" id="sheet-in"></div></div>
+<div class="modal" id="modal"><div class="modal-in" id="modal-in"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="file-in" accept="application/json" hidden>
+
+<script>
+'use strict';
+// ================= utils =================
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch{ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} },
+  del(k){ try{ localStorage.removeItem(k); }catch{} }
+};
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c==='x'?r:(r&3|8)).toString(16); }));
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today = () => iso(new Date());
+const addDays = (s, n) => { const [y,m,d] = s.split('-').map(Number); return iso(new Date(y, m-1, d+n)); };
+const diffDays = (a, b) => { const p = s => { const [y,m,d] = s.split('-').map(Number); return Date.UTC(y,m-1,d); }; return Math.round((p(a)-p(b))/864e5); };
+const MON = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const WD = ['вс','пн','вт','ср','чт','пт','сб'];
+const WDF = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const dObj = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+function fmtDue(s){
+  const n = diffDays(s, today());
+  if (n === 0) return 'Сегодня';
+  if (n === 1) return 'Завтра';
+  if (n === -1) return 'Вчера';
+  const d = dObj(s);
+  const base = `${d.getDate()} ${MON[d.getMonth()]}`;
+  return (n > 1 && n < 7) ? `${WD[d.getDay()]}, ${base}` : base;
+}
+function plural(n, a, b, c){ const m10 = n%10, m100 = n%100; return m10===1&&m100!==11 ? a : (m10>=2&&m10<=4&&(m100<10||m100>=20) ? b : c); }
+
+const STATUS = { todo:'Сделать', doing:'В работе', waiting:'Ждёт', done:'Готово' };
+const PRIO = { 1:'🔥 Высокий', 2:'Обычный', 3:'Низкий' };
+const DEFAULT_AREAS = [
+  ['Store 457','🏪','#6c8cff'], ['Kynne&Tech','📱','#a78bfa'], ['EV77','🚗','#4cc38a'],
+  ['DioNis','🎵','#f5b84c'], ['Личное','🏠','#ff8a8a']
+];
+
+// ================= backends =================
+let cfg = LS.get('tc_cfg', null);   // {url, anon, key}
+
+const Local = {
+  load(){
+    let db = LS.get('tc_local', null);
+    if (!db){
+      db = { areas: DEFAULT_AREAS.map(([name,emoji,color], i) => ({ id: uid(), name, emoji, color, sort: i+1 })), tasks: [] };
+      LS.set('tc_local', db);
+    }
+    return db;
+  },
+  save(db){ LS.set('tc_local', db); },
+  async list(){ const db = this.load(); const cut = Date.now() - 30*864e5;
+    return { areas: db.areas, tasks: db.tasks.filter(t => t.status !== 'done' || !t.done_at || Date.parse(t.done_at) > cut), today: today() }; },
+  async addTask(t){ const db = this.load(); const now = new Date().toISOString();
+    const n = { id: uid(), title: t.title, notes: t.notes||'', area_id: t.area_id||null, status: t.status||'todo', priority: t.priority||2, due: t.due||null, created_at: now, updated_at: now, done_at: t.status==='done' ? now : null };
+    db.tasks.push(n); this.save(db); return n; },
+  async updateTask(id, p){ const db = this.load(); const t = db.tasks.find(x => x.id === id); if (!t) throw new Error('Задача не найдена');
+    Object.assign(t, p, { updated_at: new Date().toISOString() });
+    t.done_at = t.status === 'done' ? (t.done_at || new Date().toISOString()) : null;
+    this.save(db); return t; },
+  async deleteTask(id){ const db = this.load(); db.tasks = db.tasks.filter(x => x.id !== id); this.save(db); },
+  async addArea(a){ const db = this.load(); const n = { id: uid(), name: a.name, emoji: a.emoji||'📁', color: a.color||'#6c8cff', sort: Math.max(0, ...db.areas.map(x=>x.sort||0)) + 1 };
+    db.areas.push(n); this.save(db); return n; },
+  async updateArea(id, p){ const db = this.load(); const a = db.areas.find(x => x.id === id); if (a) Object.assign(a, p); this.save(db); return a; },
+  async deleteArea(id){ const db = this.load(); db.areas = db.areas.filter(x => x.id !== id); db.tasks.forEach(t => { if (t.area_id === id) t.area_id = null; }); this.save(db); }
+};
+
+async function rpc(fn, args, c = cfg){
+  const headers = { 'apikey': c.anon, 'Content-Type': 'application/json' };
+  if (c.anon.startsWith('eyJ')) headers.Authorization = 'Bearer ' + c.anon;  // старый формат anon-ключа
+  const r = await fetch(c.url.replace(/\/+$/, '') + '/rest/v1/rpc/' + fn, { method: 'POST', headers, body: JSON.stringify({ p_key: c.key, ...args }) });
+  const j = await r.json().catch(() => null);
+  if (!r.ok) throw new Error((j && (j.message || j.hint)) || ('Ошибка ' + r.status));
+  return j;
+}
+const Cloud = {
+  async list(){ return rpc('tm_list', { p_done_days: 30 }); },
+  async addTask(t){ return rpc('tm_add_task', { p_title: t.title, p_notes: t.notes||'', p_area: t.area_id||null, p_priority: t.priority||2, p_due: t.due||null, p_status: t.status||'todo' }); },
+  async updateTask(id, p){
+    const a = { p_id: id };
+    if ('title' in p) a.p_title = p.title;
+    if ('notes' in p) a.p_notes = p.notes;
+    if ('priority' in p) a.p_priority = p.priority;
+    if ('status' in p) a.p_status = p.status;
+    if ('due' in p){ if (p.due) a.p_due = p.due; else a.p_clear_due = true; }
+    if ('area_id' in p){ if (p.area_id) a.p_area = p.area_id; else a.p_clear_area = true; }
+    return rpc('tm_update_task', a);
+  },
+  async deleteTask(id){ return rpc('tm_delete_task', { p_id: id }); },
+  async addArea(a){ return rpc('tm_add_area', { p_name: a.name, p_emoji: a.emoji||'📁', p_color: a.color||'#6c8cff' }); },
+  async updateArea(id, p){ return rpc('tm_update_area', { p_id: id, p_name: p.name ?? null, p_emoji: p.emoji ?? null, p_color: p.color ?? null, p_sort: p.sort ?? null }); },
+  async deleteArea(id){ return rpc('tm_delete_area', { p_id: id }); }
+};
+const api = () => (cfg ? Cloud : Local);
+
+// ================= state =================
+const S = {
+  view: LS.get('tc_view', 'today'),
+  areaId: null,
+  areas: [], tasks: [],
+  loading: false, syncErr: null,
+  showDone: {},
+  q: ''
+};
+if (String(S.view).startsWith('area:')){ S.areaId = S.view.slice(5); S.view = 'area'; }
+
+function cacheSave(){ if (cfg) LS.set('tc_cache', { areas: S.areas, tasks: S.tasks }); }
+function areaOf(id){ return S.areas.find(a => a.id === id); }
+
+async function reload(silent){
+  S.loading = true; if (!silent) render();
+  try{
+    const d = await api().list();
+    S.areas = (d.areas || []).slice().sort((a,b) => (a.sort||0)-(b.sort||0));
+    S.tasks = d.tasks || [];
+    S.syncErr = null; cacheSave();
+  }catch(e){
+    S.syncErr = e.message;
+    if (!silent) toast('Не удалось обновить: ' + e.message, true);
+  }finally{ S.loading = false; render(); }
+}
+
+// оптимистичное изменение + запрос
+async function act(localFn, remoteFn, okMsg){
+  localFn(); render();
+  try{ const r = await remoteFn(); if (okMsg) toast(okMsg); return r; }
+  catch(e){ toast('Ошибка: ' + e.message, true); await reload(true); }
+}
+
+// ================= task ops =================
+async function createTask(t){
+  const tmp = { id: 'tmp-' + uid(), notes:'', status:'todo', priority:2, due:null, area_id:null, created_at:new Date().toISOString(), ...t };
+  const r = await act(() => S.tasks.push(tmp), () => api().addTask(t), 'Добавлено');
+  if (r){ const i = S.tasks.indexOf(tmp); if (i >= 0) S.tasks[i] = r; cacheSave(); render(); }
+}
+async function patchTask(id, p, msg){
+  const t = S.tasks.find(x => x.id === id); if (!t || id.startsWith('tmp-')) return;
+  await act(() => { Object.assign(t, p); t.done_at = t.status === 'done' ? (t.done_at || new Date().toISOString()) : null; },
+            () => api().updateTask(id, p), msg);
+  cacheSave();
+}
+async function removeTask(id){
+  await act(() => { S.tasks = S.tasks.filter(x => x.id !== id); }, () => api().deleteTask(id), 'Удалено');
+  cacheSave();
+}
+function toggleDone(id){
+  const t = S.tasks.find(x => x.id === id); if (!t) return;
+  if (navigator.vibrate) navigator.vibrate(10);
+  patchTask(id, { status: t.status === 'done' ? 'todo' : 'done' });
+}
+
+// ================= icons =================
+const I = {
+  today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  areas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
+  inbox:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z"/></svg>',
+  plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
+};
+
+// ================= rendering =================
+const open = t => t.status !== 'done';
+const isOver = t => open(t) && t.due && t.due < today();
+const sortTasks = arr => arr.slice().sort((a,b) =>
+  (a.status==='done') - (b.status==='done') ||
+  (a.priority||2) - (b.priority||2) ||
+  ((a.due||'9999') < (b.due||'9999') ? -1 : (a.due||'9999') > (b.due||'9999') ? 1 : 0) ||
+  String(a.created_at||'').localeCompare(String(b.created_at||'')));
+
+function taskRow(t, opts = {}){
+  const a = areaOf(t.area_id);
+  const chips = [];
+  if (a && !opts.hideArea) chips.push(`<span class="chip"><span class="dot" style="background:${esc(a.color)}"></span>${esc(a.name)}</span>`);
+  if (!a && !opts.hideArea && t.area_id == null) chips.push(`<span class="chip">📥 Входящие</span>`);
+  if (t.due && !opts.hideDue){
+    const cls = isOver(t) ? 'red' : (t.due === today() ? 'accent' : '');
+    chips.push(`<span class="chip ${cls}">${isOver(t) ? '⏰ ' : ''}${fmtDue(t.due)}</span>`);
+  }
+  if (t.status === 'doing') chips.push(`<span class="chip violet">▶ В работе</span>`);
+  if (t.status === 'waiting') chips.push(`<span class="chip amber">⏳ Ждёт</span>`);
+  if (t.priority === 1 && t.status !== 'done') chips.push(`<span class="chip red">🔥</span>`);
+  return `<div class="task p${t.priority||2} ${t.status==='done'?'done':''}" data-id="${esc(t.id)}">
+    <button class="chk" data-act="toggle" aria-label="Готово"></button>
+    <div class="tbody" data-act="edit">
+      <div class="ttl">${esc(t.title)}</div>
+      ${t.notes ? `<div class="note">${esc(t.notes)}</div>` : ''}
+      ${chips.length ? `<div class="meta">${chips.join('')}</div>` : ''}
+    </div></div>`;
+}
+function section(title, tasks, opts = {}){
+  if (!tasks.length && !opts.keep) return '';
+  return `<div class="sec ${opts.cls||''}">${title}<span class="n">${tasks.length}</span>${opts.extra||''}</div>
+    <div class="list">${tasks.map(t => taskRow(t, opts)).join('')}</div>`;
+}
+function doneSection(key, tasks, opts = {}){
+  if (!tasks.length) return '';
+  const on = S.showDone[key];
+  return `<div class="sec">Готово<span class="n">${tasks.length}</span><button class="toggle" data-act="show-done" data-k="${key}">${on ? 'скрыть' : 'показать'}</button></div>
+    ${on ? `<div class="list">${tasks.map(t => taskRow(t, opts)).join('')}</div>` : ''}`;
+}
+function header(title, sub, back){
+  const dot = cfg ? (S.syncErr ? 'err' : 'on') : '';
+  return `<div class="hdr">
+    ${back ? `<button class="back" data-act="go" data-v="areas">${I.back}</button>` : ''}
+    <div style="flex:1;min-width:0"><h1>${title}</h1><div class="sub"><span class="sync-dot ${dot}"></span>${sub}</div></div>
+    <button class="icon-btn ${S.loading?'spin':''}" data-act="refresh" aria-label="Обновить">${I.refresh}</button>
+    <button class="icon-btn" data-act="settings" aria-label="Настройки">${I.gear}</button>
+  </div>`;
+}
+function quickAdd(ph){ return `<form class="quick" data-form="quick"><input name="q" placeholder="${ph}" autocomplete="off" enterkeyhint="done"><button type="submit">+</button></form>`; }
+
+function viewToday(){
+  const td = today(), d = new Date();
+  const over = sortTasks(S.tasks.filter(isOver));
+  const tod  = sortTasks(S.tasks.filter(t => open(t) && t.due === td));
+  const doing = sortTasks(S.tasks.filter(t => open(t) && t.status === 'doing' && !(t.due && t.due <= td)));
+  const hot  = sortTasks(S.tasks.filter(t => open(t) && t.priority === 1 && !t.due && t.status !== 'doing'));
+  const doneToday = S.tasks.filter(t => t.status === 'done' && t.done_at && iso(new Date(t.done_at)) === td);
+  const openAll = S.tasks.filter(open).length;
+  let h = header('Сегодня', `${WDF[d.getDay()]}, ${d.getDate()} ${MON[d.getMonth()]}`);
+  h += `<div class="stats">
+    <div class="stat red"><div class="v">${over.length}</div><div class="l">просрочено</div></div>
+    <div class="stat accent"><div class="v">${tod.length}</div><div class="l">на сегодня</div></div>
+    <div class="stat green"><div class="v">${doneToday.length}</div><div class="l">сделано</div></div></div>`;
+  h += section('🔥 Горит', over, { cls: 'red' });
+  h += section('Сегодня', tod, { cls: 'accent', hideDue: true });
+  h += section('В работе', doing);
+  h += section('Важное без срока', hot);
+  if (!over.length && !tod.length && !doing.length && !hot.length)
+    h += `<div class="empty" style="margin-top:16px"><b>☀️</b>На сегодня ничего не горит.<br>Всего открытых задач: ${openAll}</div>`;
+  h += doneSection('today', doneToday);
+  return h;
+}
+
+function viewAreas(){
+  let h = header('Полки', `${S.tasks.filter(open).length} ${plural(S.tasks.filter(open).length,'открытая задача','открытые задачи','открытых задач')}`);
+  h += `<input class="search" id="search" placeholder="🔍 Поиск по всем задачам" value="${esc(S.q)}" autocomplete="off">`;
+  if (S.q.trim()){
+    const q = S.q.trim().toLowerCase();
+    const res = sortTasks(S.tasks.filter(t => (t.title + ' ' + (t.notes||'')).toLowerCase().includes(q)));
+    return h + (res.length ? section('Найдено', res) : `<div class="empty">Ничего не найдено</div>`);
+  }
+  const inboxN = S.tasks.filter(t => open(t) && !t.area_id).length;
+  h += `<div class="areas">`;
+  for (const a of S.areas){
+    const ts = S.tasks.filter(t => t.area_id === a.id);
+    const op = ts.filter(open).length, ov = ts.filter(isOver).length, dn = ts.length - op;
+    const pct = ts.length ? Math.round(dn / ts.length * 100) : 0;
+    h += `<button class="area" style="--c:${esc(a.color)}" data-act="open-area" data-v="${esc(a.id)}">
+      <div class="em">${esc(a.emoji)}</div><div class="nm">${esc(a.name)}</div>
+      <div class="cnt">${op} ${plural(op,'задача','задачи','задач')}${ov ? ` · <span class="r">${ov} горит</span>` : ''}</div>
+      <div class="bar"><i style="width:${pct}%"></i></div></button>`;
+  }
+  h += `<button class="area" style="--c:var(--faint)" data-act="go" data-v="inbox"><div class="em">📥</div><div class="nm">Входящие</div><div class="cnt">${inboxN} ${plural(inboxN,'задача','задачи','задач')}</div></button>`;
+  h += `<button class="area" style="--c:var(--line);align-items:center;justify-content:center;color:var(--muted)" data-act="new-area"><div class="em">＋</div><div class="nm" style="font-size:14px">Новая полка</div></button>`;
+  return h + `</div>`;
+}
+
+function viewArea(){
+  const a = areaOf(S.areaId);
+  if (!a){ S.view = 'areas'; return viewAreas(); }
+  const ts = S.tasks.filter(t => t.area_id === a.id);
+  const op = ts.filter(open);
+  let h = header(`${esc(a.emoji)} ${esc(a.name)}`, `${op.length} ${plural(op.length,'открытая','открытые','открытых')}${ts.filter(isOver).length ? ` · ${ts.filter(isOver).length} горит` : ''}`, true);
+  h += quickAdd(`Добавить в «${esc(a.name)}»…`);
+  h += section('В работе', sortTasks(op.filter(t => t.status === 'doing')), { hideArea: true, cls: 'accent' });
+  h += section('Сделать', sortTasks(op.filter(t => t.status === 'todo')), { hideArea: true });
+  h += section('Ждёт', sortTasks(op.filter(t => t.status === 'waiting')), { hideArea: true, cls: 'amber' });
+  if (!op.length) h += `<div class="empty"><b>✨</b>На этой полке пусто</div>`;
+  h += doneSection('a' + a.id, sortTasks(ts.filter(t => !open(t))), { hideArea: true });
+  return h;
+}
+
+function viewInbox(){
+  const ts = S.tasks.filter(t => !t.area_id);
+  const op = sortTasks(ts.filter(open));
+  let h = header('Входящие', 'Всё, что пришло в голову');
+  h += quickAdd('Что пришло в голову?');
+  h += op.length ? `<div class="list">${op.map(t => taskRow(t, { hideArea: true })).join('')}</div>`
+                 : `<div class="empty"><b>📭</b>Входящие пусты.<br>Разложи задачи по полкам — нажми на задачу и выбери полку.</div>`;
+  h += doneSection('inbox', ts.filter(t => !open(t)), { hideArea: true });
+  return h;
+}
+
+function viewPlan(){
+  const td = today();
+  const op = S.tasks.filter(open);
+  let h = header('План', 'Ближайшие 2 недели');
+  const over = sortTasks(op.filter(isOver));
+  h += section('Просрочено', over, { cls: 'red' });
+  for (let i = 0; i < 14; i++){
+    const day = addDays(td, i);
+    const ts = sortTasks(op.filter(t => t.due === day));
+    if (!ts.length && i > 2) continue;
+    const d = dObj(day);
+    const title = `<span class="day-h">${i===0?'Сегодня':i===1?'Завтра':WDF[d.getDay()]}<small>${d.getDate()} ${MON[d.getMonth()]}</small></span>`;
+    h += section(title, ts, { hideDue: true, keep: true, cls: i===0 ? 'accent' : '' });
+    if (!ts.length) h += `<div class="hint" style="padding-left:4px">— свободно</div>`;
+  }
+  const later = sortTasks(op.filter(t => t.due && t.due > addDays(td, 13)));
+  h += section('Позже', later);
+  const none = sortTasks(op.filter(t => !t.due));
+  h += section('Без срока', none, { cls: '' });
+  return h;
+}
+
+function renderNav(){
+  const over = S.tasks.filter(isOver).length;
+  const inboxN = S.tasks.filter(t => open(t) && !t.area_id).length;
+  const b = (v, ic, label, badge) => `<button class="${(S.view===v || (v==='areas'&&S.view==='area'))?'on':''}" data-act="go" data-v="${v}">${ic}${badge?`<span class="badge">${badge}</span>`:''}${label}</button>`;
+  $('#nav').innerHTML = b('today', I.today, 'Сегодня', over) + b('areas', I.areas, 'Полки') +
+    `<button class="fab" data-act="new" aria-label="Новая задача">${I.plus}</button>` +
+    b('inbox', I.inbox, 'Входящие', inboxN) + b('plan', I.plan, 'План');
+}
+
+function render(){
+  const focusSearch = document.activeElement && document.activeElement.id === 'search';
+  const pos = focusSearch ? document.activeElement.selectionStart : 0;
+  const views = { today: viewToday, areas: viewAreas, area: viewArea, inbox: viewInbox, plan: viewPlan };
+  $('#app').innerHTML = (views[S.view] || viewToday)();
+  renderNav();
+  if (focusSearch){ const s = $('#search'); if (s){ s.focus(); s.setSelectionRange(pos, pos); } }
+}
+
+function go(v){
+  S.view = v; S.q = '';
+  LS.set('tc_view', v === 'area' ? 'area:' + S.areaId : v);
+  render(); window.scrollTo(0, 0);
+}
+
+// ================= sheet / modal / toast =================
+let sheetMode = null;
+function openSheet(html, mode){
+  sheetMode = mode;
+  $('#sheet-in').innerHTML = '<div class="grab"></div>' + html;
+  $('#sheet').classList.add('show'); $('#backdrop').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet(){
+  $('#sheet').classList.remove('show'); $('#backdrop').classList.remove('show');
+  document.body.style.overflow = ''; sheetMode = null;
+}
+let tt;
+function toast(msg, err){
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(tt); tt = setTimeout(() => t.className = 'toast', err ? 3500 : 1600);
+}
+function confirmBox(text, okLabel = 'Удалить'){
+  return new Promise(res => {
+    $('#modal-in').innerHTML = `<p>${text}</p><div class="row"><button class="btn" id="m-no">Отмена</button><button class="btn pri" id="m-yes" style="${okLabel==='Удалить'?'background:var(--red)':''}">${okLabel}</button></div>`;
+    $('#modal').classList.add('show');
+    const done = v => { $('#modal').classList.remove('show'); res(v); };
+    $('#m-no').onclick = () => done(false); $('#m-yes').onclick = () => done(true);
+  });
+}
+
+// ================= editor =================
+let ed = null;
+function openEditor(task, defaults = {}){
+  ed = task ? { ...task, _id: task.id } : { title: '', notes: '', area_id: null, priority: 2, due: null, status: 'todo', ...defaults };
+  drawEditor(); setTimeout(() => { const i = $('#ed-title'); if (i && !task) i.focus(); }, 260);
+}
+function syncEd(){ const t = $('#ed-title'), n = $('#ed-notes'); if (t) ed.title = t.value; if (n) ed.notes = n.value; }
+function drawEditor(){
+  const td = today();
+  const dueChoices = [['Сегодня', td], ['Завтра', addDays(td,1)], ['Через неделю', addDays(td,7)], ['Без срока', null]];
+  const customDue = ed.due && !dueChoices.some(c => c[1] === ed.due);
+  const pk = (on, act, v, label) => `<button class="pick ${on?'on':''}" data-act="${act}" data-v="${v ?? ''}">${label}</button>`;
+  openSheet(`
+    <h2>${ed._id ? 'Задача' : 'Новая задача'}</h2>
+    <input class="fld big" id="ed-title" placeholder="Что нужно сделать?" value="${esc(ed.title)}" autocomplete="off" enterkeyhint="done">
+    <textarea class="fld" id="ed-notes" placeholder="Заметка, детали, контакты…">${esc(ed.notes)}</textarea>
+    <div class="lbl">Полка</div>
+    <div class="picks">${pk(!ed.area_id, 'ed-area', '', '📥 Входящие')}${S.areas.map(a => pk(ed.area_id === a.id, 'ed-area', a.id, `${esc(a.emoji)} ${esc(a.name)}`)).join('')}</div>
+    <div class="lbl">Срок</div>
+    <div class="picks">${dueChoices.map(([l, v]) => pk(ed.due === v, 'ed-due', v, l)).join('')}
+      <label class="pick ${customDue?'on':''}">📅 <input type="date" id="ed-date" value="${customDue ? ed.due : ''}"></label></div>
+    <div class="lbl">Приоритет</div>
+    <div class="picks">${[1,2,3].map(p => pk(ed.priority === p, 'ed-prio', p, PRIO[p])).join('')}</div>
+    <div class="lbl">Статус</div>
+    <div class="picks">${Object.entries(STATUS).map(([k, l]) => pk(ed.status === k, 'ed-status', k, l)).join('')}</div>
+    <div class="row">
+      ${ed._id ? `<button class="btn danger" data-act="ed-del">Удалить</button>` : `<button class="btn" data-act="close">Отмена</button>`}
+      <button class="btn pri" data-act="ed-save">Сохранить</button>
+    </div>`, 'editor');
+  $('#ed-date').addEventListener('change', e => { syncEd(); ed.due = e.target.value || null; drawEditorKeep(); });
+  $('#ed-title').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveEditor(); } });
+}
+function drawEditorKeep(){ const sc = $('#sheet-in').scrollTop; drawEditor(); $('#sheet-in').scrollTop = sc; }
+async function saveEditor(){
+  syncEd();
+  const title = ed.title.trim();
+  if (!title){ toast('Напиши, что нужно сделать', true); $('#ed-title').focus(); return; }
+  const data = { title, notes: ed.notes.trim(), area_id: ed.area_id || null, priority: ed.priority, due: ed.due || null, status: ed.status };
+  const id = ed._id; closeSheet();
+  if (id){
+    const old = S.tasks.find(t => t.id === id); if (!old) return;
+    const p = {}; for (const k in data) if ((old[k] ?? null) !== (data[k] ?? null)) p[k] = data[k];
+    if (Object.keys(p).length) await patchTask(id, p, 'Сохранено');
+  } else await createTask(data);
+}
+
+// ================= settings =================
+function openSettings(){
+  const st = cfg ? `<span class="sync-dot ${S.syncErr?'err':'on'}"></span>${S.syncErr ? 'Облако: ошибка — ' + esc(S.syncErr) : 'Облако Supabase подключено'}`
+                 : `<span class="sync-dot"></span>Только на этом устройстве`;
+  const c = cfg || {};
+  openSheet(`
+    <h2>Настройки</h2>
+    <div class="status-box">${st}</div>
+
+    <h3>☁️ Облако (Supabase)</h3>
+    <div class="hint">Нужно, чтобы задачи были на всех устройствах и ChatGPT мог их менять. Как получить ключи — в README.</div>
+    <input class="fld" id="s-url" placeholder="Project URL: https://xxxx.supabase.co" value="${esc(c.url||'')}" autocomplete="off" autocapitalize="off">
+    <input class="fld" id="s-anon" placeholder="Publishable / anon key" value="${esc(c.anon||'')}" autocomplete="off" autocapitalize="off">
+    <input class="fld" id="s-key" placeholder="Ключ приложения (app_key из SQL)" value="${esc(c.key||'')}" autocomplete="off" autocapitalize="off">
+    <div class="row" style="margin-top:4px">
+      ${cfg ? `<button class="btn" data-act="s-disconnect">Отключить</button>` : ''}
+      <button class="btn pri" data-act="s-connect">${cfg ? 'Сохранить' : 'Подключить'}</button>
+    </div>
+
+    <h3>🤖 ChatGPT</h3>
+    <div class="hint">${cfg ? 'Получи готовую схему и инструкцию для своего GPT — значения уже подставлены.' : 'Сначала подключи облако.'}</div>
+    <button class="btn" style="width:100%" data-act="s-gpt" ${cfg?'':'disabled'}>Настройки для ChatGPT</button>
+
+    <h3>🗂 Полки</h3>
+    <div id="s-areas">${S.areas.map(a => `<div class="arow" data-aid="${esc(a.id)}">
+        <input class="fld em-in" value="${esc(a.emoji)}" data-f="emoji" maxlength="4">
+        <input class="fld" value="${esc(a.name)}" data-f="name">
+        <input type="color" value="${esc(a.color)}" data-f="color">
+        <button class="del" data-act="s-del-area" data-v="${esc(a.id)}">✕</button></div>`).join('')}</div>
+    <button class="btn" style="width:100%;margin-top:4px" data-act="new-area">＋ Добавить полку</button>
+
+    <h3>💾 Резервная копия</h3>
+    <div class="row" style="margin-top:0">
+      <button class="btn" data-act="s-export">Скачать JSON</button>
+      <button class="btn" data-act="s-import">Загрузить JSON</button>
+    </div>
+    <div class="hint" style="margin-top:18px;text-align:center;color:var(--faint)">Центр задач · v1.0</div>
+  `, 'settings');
+  $('#s-areas').addEventListener('change', async e => {
+    const row = e.target.closest('.arow'); if (!row) return;
+    const id = row.dataset.aid, f = e.target.dataset.f, v = e.target.value.trim();
+    if (!v) return;
+    const a = areaOf(id); if (!a) return;
+    await act(() => { a[f] = v; }, () => api().updateArea(id, { [f]: v }), 'Полка сохранена');
+    cacheSave();
+  });
+}
+
+async function connectCloud(){
+  const url = $('#s-url').value.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+  const anon = $('#s-anon').value.trim(), key = $('#s-key').value.trim();
+  if (!/^https?:\/\//.test(url) || !anon || !key){ toast('Заполни все три поля', true); return; }
+  const c = { url, anon, key };
+  toast('Проверяю подключение…');
+  try{ await rpc('tm_list', { p_done_days: 0 }, c); }
+  catch(e){ toast('Не подключилось: ' + e.message, true); return; }
+  const wasLocal = !cfg;
+  const local = Local.load();
+  cfg = c; LS.set('tc_cfg', cfg);
+  closeSheet(); await reload();
+  toast('Облако подключено ✓');
+  if (wasLocal && local.tasks.length){
+    const ok = await confirmBox(`На этом устройстве есть ${local.tasks.length} ${plural(local.tasks.length,'задача','задачи','задач')}. Перенести их в облако?`, 'Перенести');
+    if (ok) await migrate(local);
+  }
+}
+async function migrate(src){
+  toast('Переношу…');
+  try{
+    const have = new Map(S.areas.map(a => [a.name.toLowerCase(), a.id]));
+    const map = {};
+    for (const a of src.areas){
+      let id = have.get(a.name.toLowerCase());
+      if (!id){ const n = await Cloud.addArea(a); id = n.id; have.set(a.name.toLowerCase(), id); }
+      map[a.id] = id;
+    }
+    let n = 0;
+    for (const t of src.tasks){
+      await Cloud.addTask({ ...t, area_id: t.area_id ? (map[t.area_id] || null) : null }); n++;
+    }
+    await reload(true); toast(`Перенесено: ${n}`);
+    return true;
+  }catch(e){ toast('Ошибка переноса: ' + e.message, true); await reload(true); return false; }
+}
+async function disconnect(){
+  if (!await confirmBox('Отключить облако? Задачи в облаке останутся, приложение вернётся к локальным данным этого устройства.', 'Отключить')) return;
+  cfg = null; LS.del('tc_cfg'); LS.del('tc_cache'); closeSheet(); await reload();
+}
+
+function exportJson(){
+  const data = JSON.stringify({ app: 'task-center', exported: new Date().toISOString(), areas: S.areas, tasks: S.tasks }, null, 2);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+  a.download = `tasks-${today()}.json`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+async function importJson(file){
+  try{
+    const d = JSON.parse(await file.text());
+    if (!Array.isArray(d.tasks) || !Array.isArray(d.areas)) throw new Error('не тот формат');
+    if (!await confirmBox(`Добавить ${d.tasks.length} ${plural(d.tasks.length,'задачу','задачи','задач')} из файла к текущим?`, 'Добавить')) return;
+    if (cfg){ closeSheet(); await migrate(d); }
+    else{
+      const db = Local.load(); const have = new Map(db.areas.map(a => [a.name.toLowerCase(), a.id])); const map = {};
+      for (const a of d.areas){ let id = have.get(String(a.name).toLowerCase()); if (!id){ id = uid(); db.areas.push({ ...a, id }); have.set(a.name.toLowerCase(), id); } map[a.id] = id; }
+      for (const t of d.tasks) db.tasks.push({ ...t, id: uid(), area_id: t.area_id ? (map[t.area_id] || null) : null });
+      Local.save(db); closeSheet(); await reload(); toast('Импортировано');
+    }
+  }catch(e){ toast('Не удалось прочитать файл: ' + e.message, true); }
+}
+
+async function newArea(){
+  closeSheet();
+  $('#modal-in').innerHTML = `<p>Новая полка</p>
+    <div class="arow" style="margin-top:12px"><input class="fld em-in" id="na-em" value="📁" maxlength="4"><input class="fld" id="na-name" placeholder="Название"></div>
+    <div class="row"><button class="btn" id="m-no">Отмена</button><button class="btn pri" id="m-yes">Создать</button></div>`;
+  $('#modal').classList.add('show'); setTimeout(() => $('#na-name').focus(), 50);
+  const close = () => $('#modal').classList.remove('show');
+  $('#m-no').onclick = close;
+  const ok = async () => {
+    const name = $('#na-name').value.trim(), emoji = $('#na-em').value.trim() || '📁';
+    if (!name) return;
+    close();
+    const colors = ['#6c8cff','#a78bfa','#4cc38a','#f5b84c','#ff8a8a','#38bdf8','#f472b6','#facc15'];
+    const color = colors[S.areas.length % colors.length];
+    const tmp = { id: 'tmp-' + uid(), name, emoji, color, sort: 999 };
+    const r = await act(() => S.areas.push(tmp), () => api().addArea({ name, emoji, color }), 'Полка создана');
+    if (r){ const i = S.areas.indexOf(tmp); if (i >= 0) S.areas[i] = r; cacheSave(); render(); }
+  };
+  $('#m-yes').onclick = ok;
+  $('#na-name').onkeydown = e => { if (e.key === 'Enter') ok(); };
+}
+
+// ================= ChatGPT setup =================
+function gptSchema(){
+  const KEY = { type: 'string', enum: [cfg.key], description: 'Ключ приложения. Всегда передавай ровно это значение.' };
+  const ok = { '200': { description: 'OK', content: { 'application/json': { schema: { type: 'object' } } } } };
+  const op = (id, summary, props, req, consequential = false) => ({ post: {
+    operationId: id, summary, 'x-openai-isConsequential': consequential,
+    requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['p_key', ...req], properties: { p_key: KEY, ...props } } } } },
+    responses: ok } });
+  const area = { type: 'string', description: 'Название полки (например "Store 457") или её id. Не указывай — задача попадёт во «Входящие».' };
+  const prio = { type: 'integer', enum: [1,2,3], description: '1 — высокий/срочно, 2 — обычный, 3 — низкий' };
+  const due = { type: 'string', format: 'date', description: 'Срок в формате ГГГГ-ММ-ДД' };
+  const status = { type: 'string', enum: ['todo','doing','waiting','done'], description: 'todo — сделать, doing — в работе, waiting — ждёт кого-то, done — готово' };
+  return {
+    openapi: '3.1.0',
+    info: { title: 'Центр задач', version: '1.0.0', description: 'Личный центр задач: полки (направления) и задачи.' },
+    servers: [{ url: cfg.url + '/rest/v1' }],
+    paths: {
+      '/rpc/tm_list': op('listTasks', 'Все полки и задачи (открытые + выполненные за p_done_days дней) и сегодняшняя дата today (Москва)',
+        { p_done_days: { type: 'integer', default: 7 } }, []),
+      '/rpc/tm_add_task': op('addTask', 'Добавить задачу',
+        { p_title: { type: 'string' }, p_notes: { type: 'string' }, p_area: area, p_priority: prio, p_due: due, p_status: status }, ['p_title']),
+      '/rpc/tm_update_task': op('updateTask', 'Изменить задачу. Передавай только то, что меняется.',
+        { p_id: { type: 'string', format: 'uuid' }, p_title: { type: 'string' }, p_notes: { type: 'string' }, p_area: area, p_priority: prio, p_due: due, p_status: status,
+          p_clear_due: { type: 'boolean', description: 'true — убрать срок' }, p_clear_area: { type: 'boolean', description: 'true — переложить во «Входящие»' } }, ['p_id']),
+      '/rpc/tm_delete_task': op('deleteTask', 'Удалить задачу навсегда', { p_id: { type: 'string', format: 'uuid' } }, ['p_id'], true),
+      '/rpc/tm_add_area': op('addArea', 'Создать новую полку', { p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string', description: 'HEX цвет, например #6c8cff' } }, ['p_name']),
+      '/rpc/tm_update_area': op('updateArea', 'Переименовать или изменить полку', { p_id: { type: 'string', format: 'uuid' }, p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string' }, p_sort: { type: 'integer' } }, ['p_id']),
+      '/rpc/tm_delete_area': op('deleteArea', 'Удалить полку (её задачи уйдут во «Входящие»)', { p_id: { type: 'string', format: 'uuid' } }, ['p_id'], true)
+    }
+  };
+}
+const GPT_INSTRUCTIONS = `Ты — помощник по личному Центру задач Дениса. Отвечай по-русски, коротко и по делу.
+
+Как работать с задачами:
+- Перед любым ответом о задачах или изменением сначала вызови listTasks — так ты узнаешь актуальные id, полки и сегодняшнюю дату (поле today, время московское).
+- Даты передавай в формате ГГГГ-ММ-ДД. «Завтра», «в пятницу», «через неделю» считай от today.
+- Полку передавай названием в p_area (например "Store 457", "EV77"). Если непонятно, куда положить, — не указывай полку: задача попадёт во «Входящие».
+- Приоритет: 1 — срочно/важно, 2 — обычный (по умолчанию), 3 — низкий.
+- Статусы: todo — сделать, doing — в работе, waiting — ждёт кого-то/чего-то, done — готово.
+- «Сделал», «закрой», «готово» → updateTask с p_status="done".
+- Убрать срок → p_clear_due=true. Переложить во «Входящие» → p_clear_area=true.
+- Если я диктую несколько задач сразу — добавь каждую отдельным вызовом addTask. Длинные детали клади в p_notes, а название делай коротким.
+- Удаляй только по прямой просьбе. Если сомневаешься — лучше отметь выполненной.
+- Если полки нет — спроси, создать ли новую (addArea).
+
+Как отвечать:
+- После изменений — одна-две строки: что сделал.
+- На «что на сегодня?», «что горит?» — покажи просроченное и задачи на сегодня, сгруппируй по полкам, срочные первыми.
+- На «разбери входящие» — предложи, на какие полки и с какими сроками разложить задачи без полки, и после моего «да» сделай.
+- На «план на неделю» — задачи на 7 дней вперёд по дням.`;
+
+function openGpt(){
+  const schema = JSON.stringify(gptSchema(), null, 2);
+  openSheet(`
+    <h2>🤖 Подключить ChatGPT</h2>
+    <div class="hint">
+      1. ChatGPT → <b>Explore GPTs</b> → <b>Create</b> → вкладка <b>Configure</b>.<br>
+      2. Name: <code>Центр задач</code>. В <b>Instructions</b> вставь текст ниже.<br>
+      3. Внизу <b>Create new action</b> → в <b>Schema</b> вставь схему.<br>
+      4. <b>Authentication</b> → <b>API Key</b> → Auth Type <b>Custom</b> → Custom Header Name: <code>apikey</code>, API Key: твой Publishable/anon key.<br>
+      5. Сохрани GPT как <b>Only me</b> (только для меня) — в схеме твой ключ.
+    </div>
+    <div class="lbl">Instructions</div>
+    <pre class="code" id="g-ins">${esc(GPT_INSTRUCTIONS)}</pre>
+    <button class="btn" style="width:100%" data-act="copy" data-src="g-ins">Скопировать инструкцию</button>
+    <div class="lbl" style="margin-top:16px">Schema</div>
+    <pre class="code" id="g-sch">${esc(schema)}</pre>
+    <button class="btn" style="width:100%" data-act="copy" data-src="g-sch">Скопировать схему</button>
+    <div class="lbl" style="margin-top:16px">API Key (для Authentication)</div>
+    <pre class="code" id="g-key">${esc(cfg.anon)}</pre>
+    <button class="btn" style="width:100%" data-act="copy" data-src="g-key">Скопировать ключ</button>
+    <div class="row"><button class="btn" data-act="settings">← Назад</button></div>
+  `, 'gpt');
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); }
+  catch{ const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch{} ta.remove(); }
+  toast('Скопировано');
+}
+
+// ================= events =================
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, v = el.dataset.v;
+  const tid = el.closest('.task')?.dataset.id;
+  switch (a){
+    case 'go': go(v); break;
+    case 'open-area': S.areaId = v; go('area'); break;
+    case 'toggle': toggleDone(tid); break;
+    case 'edit': { const t = S.tasks.find(x => x.id === tid); if (t) openEditor(t); break; }
+    case 'new': {
+      const d = {};
+      if (S.view === 'today') d.due = today();
+      if (S.view === 'area') d.area_id = S.areaId;
+      openEditor(null, d); break;
+    }
+    case 'refresh': reload(); break;
+    case 'settings': openSettings(); break;
+    case 'close': closeSheet(); break;
+    case 'show-done': S.showDone[el.dataset.k] = !S.showDone[el.dataset.k]; render(); break;
+    case 'new-area': newArea(); break;
+    // editor
+    case 'ed-area': syncEd(); ed.area_id = v || null; drawEditorKeep(); break;
+    case 'ed-due': syncEd(); ed.due = v || null; drawEditorKeep(); break;
+    case 'ed-prio': syncEd(); ed.priority = Number(v); drawEditorKeep(); break;
+    case 'ed-status': syncEd(); ed.status = v; drawEditorKeep(); break;
+    case 'ed-save': saveEditor(); break;
+    case 'ed-del': { const id = ed._id; if (await confirmBox('Удалить задачу навсегда?')){ closeSheet(); removeTask(id); } break; }
+    // settings
+    case 's-connect': connectCloud(); break;
+    case 's-disconnect': disconnect(); break;
+    case 's-gpt': openGpt(); break;
+    case 's-export': exportJson(); break;
+    case 's-import': $('#file-in').click(); break;
+    case 's-del-area': {
+      const ar = areaOf(v); if (!ar) break;
+      const n = S.tasks.filter(t => t.area_id === v).length;
+      if (!await confirmBox(`Удалить полку «${esc(ar.name)}»?${n ? ` ${n} ${plural(n,'задача уйдёт','задачи уйдут','задач уйдут')} во «Входящие».` : ''}`)) break;
+      await act(() => { S.areas = S.areas.filter(x => x.id !== v); S.tasks.forEach(t => { if (t.area_id === v) t.area_id = null; }); },
+                () => api().deleteArea(v), 'Полка удалена');
+      cacheSave(); openSettings(); break;
+    }
+    case 'copy': copyText($('#' + el.dataset.src).textContent); break;
+  }
+});
+document.addEventListener('submit', e => {
+  const f = e.target.closest('[data-form="quick"]'); if (!f) return;
+  e.preventDefault();
+  const inp = f.querySelector('input'); const title = inp.value.trim(); if (!title) return;
+  const t = { title };
+  if (S.view === 'area') t.area_id = S.areaId;
+  if (title.endsWith('!')){ t.title = title.replace(/!+$/, '').trim(); t.priority = 1; }
+  inp.value = '';
+  createTask(t).then(() => { const i = document.querySelector('.quick input'); if (i) i.focus(); });
+});
+document.addEventListener('input', e => { if (e.target.id === 'search'){ S.q = e.target.value; render(); } });
+$('#backdrop').addEventListener('click', closeSheet);
+$('#file-in').addEventListener('change', e => { const f = e.target.files[0]; if (f) importJson(f); e.target.value = ''; });
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if ($('#modal').classList.contains('show')) $('#modal').classList.remove('show'); else closeSheet(); } });
+
+// свайп вниз закрывает шторку
+(() => { let y0 = null; const s = $('#sheet-in');
+  s.addEventListener('touchstart', e => { y0 = s.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
+  s.addEventListener('touchend', e => { if (y0 != null && e.changedTouches[0].clientY - y0 > 90) closeSheet(); y0 = null; }, { passive: true });
+})();
+
+// автообновление: при возврате в приложение и раз в минуту (чтобы видеть правки ChatGPT)
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && cfg && !sheetMode) reload(true); });
+setInterval(() => { if (document.visibilityState === 'visible' && cfg && !sheetMode) reload(true); }, 60000);
+let lastDay = today();
+setInterval(() => { if (today() !== lastDay){ lastDay = today(); render(); } }, 30000);
+
+// ================= start =================
+if (cfg){ const c = LS.get('tc_cache', null); if (c){ S.areas = c.areas || []; S.tasks = c.tasks || []; } }
+render();
+reload(true);
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
