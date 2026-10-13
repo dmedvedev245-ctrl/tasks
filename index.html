@@ -141,6 +141,24 @@ pre.code{background:var(--bg);border-radius:12px;padding:12px;font-size:11.5px;l
 .day-h{display:flex;align-items:baseline;gap:8px}
 .day-h small{font-weight:600;color:var(--faint);text-transform:none;letter-spacing:0}
 @media (min-width:560px){.areas{grid-template-columns:repeat(3,1fr)}}
+.subareas{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.subarea{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--r);padding:12px 14px;text-align:left;border-left:3px solid var(--c)}
+.subarea .nm{font-weight:700;flex:1;min-width:0}
+.subarea .cnt{font-size:13px;color:var(--muted);white-space:nowrap}
+.subarea .cnt .r{color:var(--red);font-weight:700}
+.subarea .go{color:var(--faint);font-size:18px}
+.subarea.add{border-left-color:var(--line);color:var(--muted);justify-content:center;font-weight:600;font-size:14px}
+.chip.btnchip{cursor:pointer;color:var(--accent);background:rgba(108,140,255,.14)}
+.task.child{position:relative}
+.task.child::before{content:"";position:absolute;left:-12px;top:0;bottom:50%;width:10px;border-left:2px solid var(--line);border-bottom:2px solid var(--line);border-bottom-left-radius:8px}
+.subrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.subrow .chk{width:20px;height:20px}
+.subrow.done .t{text-decoration:line-through;color:var(--muted)}
+.subrow .t{flex:1;cursor:pointer}
+.subrow .n{font-size:12px;color:var(--muted)}
+.subrow.done .chk{background:var(--green);border-color:var(--green)}
+select.fld{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}
+.parent-link{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--accent);margin:-4px 0 12px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -214,17 +232,23 @@ const Local = {
   async list(){ const db = this.load(); const cut = Date.now() - 30*864e5;
     return { areas: db.areas, tasks: db.tasks.filter(t => t.status !== 'done' || !t.done_at || Date.parse(t.done_at) > cut), today: today() }; },
   async addTask(t){ const db = this.load(); const now = new Date().toISOString();
-    const n = { id: uid(), title: t.title, notes: t.notes||'', area_id: t.area_id||null, status: t.status||'todo', priority: t.priority||2, due: t.due||null, created_at: now, updated_at: now, done_at: t.status==='done' ? now : null };
+    const par = t.parent_id ? db.tasks.find(x => x.id === t.parent_id) : null;
+    const n = { id: uid(), title: t.title, notes: t.notes||'', area_id: t.area_id || (par ? par.area_id : null), parent_id: t.parent_id||null, status: t.status||'todo', priority: t.priority||2, due: t.due||null, created_at: now, updated_at: now, done_at: t.status==='done' ? now : null };
     db.tasks.push(n); this.save(db); return n; },
   async updateTask(id, p){ const db = this.load(); const t = db.tasks.find(x => x.id === id); if (!t) throw new Error('Задача не найдена');
     Object.assign(t, p, { updated_at: new Date().toISOString() });
     t.done_at = t.status === 'done' ? (t.done_at || new Date().toISOString()) : null;
     this.save(db); return t; },
-  async deleteTask(id){ const db = this.load(); db.tasks = db.tasks.filter(x => x.id !== id); this.save(db); },
-  async addArea(a){ const db = this.load(); const n = { id: uid(), name: a.name, emoji: a.emoji||'📁', color: a.color||'#6c8cff', sort: Math.max(0, ...db.areas.map(x=>x.sort||0)) + 1 };
+  async deleteTask(id){ const db = this.load(); const kill = new Set([id]); let grow = true;
+    while (grow){ grow = false; for (const t of db.tasks) if (t.parent_id && kill.has(t.parent_id) && !kill.has(t.id)){ kill.add(t.id); grow = true; } }
+    db.tasks = db.tasks.filter(x => !kill.has(x.id)); this.save(db); },
+  async addArea(a){ const db = this.load(); const par = a.parent_id ? db.areas.find(x => x.id === a.parent_id) : null;
+    const n = { id: uid(), name: a.name, emoji: a.emoji||'📁', color: a.color || (par ? par.color : '#6c8cff'), parent_id: a.parent_id||null, sort: Math.max(0, ...db.areas.filter(x => (x.parent_id||null) === (a.parent_id||null)).map(x=>x.sort||0)) + 1 };
     db.areas.push(n); this.save(db); return n; },
   async updateArea(id, p){ const db = this.load(); const a = db.areas.find(x => x.id === id); if (a) Object.assign(a, p); this.save(db); return a; },
-  async deleteArea(id){ const db = this.load(); db.areas = db.areas.filter(x => x.id !== id); db.tasks.forEach(t => { if (t.area_id === id) t.area_id = null; }); this.save(db); }
+  async deleteArea(id){ const db = this.load(); const a = db.areas.find(x => x.id === id); const par = a ? (a.parent_id||null) : null;
+    db.areas.forEach(x => { if (x.parent_id === id) x.parent_id = par; }); db.tasks.forEach(t => { if (t.area_id === id) t.area_id = par; });
+    db.areas = db.areas.filter(x => x.id !== id); this.save(db); }
 };
 
 async function rpc(fn, args, c = cfg){
@@ -237,7 +261,7 @@ async function rpc(fn, args, c = cfg){
 }
 const Cloud = {
   async list(){ return rpc('tm_list', { p_done_days: 30 }); },
-  async addTask(t){ return rpc('tm_add_task', { p_title: t.title, p_notes: t.notes||'', p_area: t.area_id||null, p_priority: t.priority||2, p_due: t.due||null, p_status: t.status||'todo' }); },
+  async addTask(t){ return rpc('tm_add_task', { p_title: t.title, p_notes: t.notes||'', p_area: t.area_id||null, p_priority: t.priority||2, p_due: t.due||null, p_status: t.status||'todo', p_parent: t.parent_id||null }); },
   async updateTask(id, p){
     const a = { p_id: id };
     if ('title' in p) a.p_title = p.title;
@@ -246,11 +270,16 @@ const Cloud = {
     if ('status' in p) a.p_status = p.status;
     if ('due' in p){ if (p.due) a.p_due = p.due; else a.p_clear_due = true; }
     if ('area_id' in p){ if (p.area_id) a.p_area = p.area_id; else a.p_clear_area = true; }
+    if ('parent_id' in p){ if (p.parent_id) a.p_parent = p.parent_id; else a.p_clear_parent = true; }
     return rpc('tm_update_task', a);
   },
   async deleteTask(id){ return rpc('tm_delete_task', { p_id: id }); },
-  async addArea(a){ return rpc('tm_add_area', { p_name: a.name, p_emoji: a.emoji||'📁', p_color: a.color||'#6c8cff' }); },
-  async updateArea(id, p){ return rpc('tm_update_area', { p_id: id, p_name: p.name ?? null, p_emoji: p.emoji ?? null, p_color: p.color ?? null, p_sort: p.sort ?? null }); },
+  async addArea(a){ return rpc('tm_add_area', { p_name: a.name, p_emoji: a.emoji||'📁', p_color: a.color||null, p_parent: a.parent_id||null }); },
+  async updateArea(id, p){
+    const a = { p_id: id, p_name: p.name ?? null, p_emoji: p.emoji ?? null, p_color: p.color ?? null, p_sort: p.sort ?? null };
+    if ('parent_id' in p){ if (p.parent_id) a.p_parent = p.parent_id; else a.p_clear_parent = true; }
+    return rpc('tm_update_area', a);
+  },
   async deleteArea(id){ return rpc('tm_delete_area', { p_id: id }); }
 };
 const api = () => (cfg ? Cloud : Local);
@@ -262,12 +291,22 @@ const S = {
   areas: [], tasks: [],
   loading: false, syncErr: null,
   showDone: {},
+  expanded: new Set(LS.get('tc_exp', [])),
   q: ''
 };
 if (String(S.view).startsWith('area:')){ S.areaId = S.view.slice(5); S.view = 'area'; }
 
 function cacheSave(){ if (cfg) LS.set('tc_cache', { areas: S.areas, tasks: S.tasks }); }
 function areaOf(id){ return S.areas.find(a => a.id === id); }
+const kidsOf = id => S.areas.filter(a => (a.parent_id||null) === (id||null)).sort((a,b) => (a.sort||0)-(b.sort||0) || a.name.localeCompare(b.name));
+function areaTree(id){ const out = [id]; for (const c of kidsOf(id)) out.push(...areaTree(c.id)); return out; }
+function areaChain(id){ const p = []; let a = areaOf(id), g = 0; while (a && g++ < 20){ p.unshift(a); a = areaOf(a.parent_id); } return p; }
+const areaPathName = id => areaChain(id).map(a => a.name).join(' / ');
+function flatAreas(parent = null, depth = 0){ return kidsOf(parent).flatMap(a => [{ a, depth }, ...flatAreas(a.id, depth + 1)]); }
+const taskOf = id => S.tasks.find(t => t.id === id);
+const subsOf = id => S.tasks.filter(t => t.parent_id === id);
+function taskDesc(id){ const out = []; for (const c of subsOf(id)) out.push(c, ...taskDesc(c.id)); return out; }
+const isTop = t => !t.parent_id || !taskOf(t.parent_id);
 
 async function reload(silent){
   S.loading = true; if (!silent) render();
@@ -302,7 +341,8 @@ async function patchTask(id, p, msg){
   cacheSave();
 }
 async function removeTask(id){
-  await act(() => { S.tasks = S.tasks.filter(x => x.id !== id); }, () => api().deleteTask(id), 'Удалено');
+  const kill = new Set([id, ...taskDesc(id).map(x => x.id)]);
+  await act(() => { S.tasks = S.tasks.filter(x => !kill.has(x.id)); }, () => api().deleteTask(id), 'Удалено');
   cacheSave();
 }
 function toggleDone(id){
@@ -332,11 +372,18 @@ const sortTasks = arr => arr.slice().sort((a,b) =>
   ((a.due||'9999') < (b.due||'9999') ? -1 : (a.due||'9999') > (b.due||'9999') ? 1 : 0) ||
   String(a.created_at||'').localeCompare(String(b.created_at||'')));
 
-function taskRow(t, opts = {}){
+function taskRow(t, opts = {}, depth = 0){
   const a = areaOf(t.area_id);
   const chips = [];
-  if (a && !opts.hideArea) chips.push(`<span class="chip"><span class="dot" style="background:${esc(a.color)}"></span>${esc(a.name)}</span>`);
-  if (!a && !opts.hideArea && t.area_id == null) chips.push(`<span class="chip">📥 Входящие</span>`);
+  const subs = subsOf(t.id);
+  if (subs.length && !opts.flat){
+    const dn = subs.filter(x => x.status === 'done').length;
+    const exp = S.expanded.has(t.id);
+    chips.push(`<span class="chip btnchip" data-act="expand">${exp ? '▾' : '▸'} ${dn}/${subs.length}</span>`);
+  } else if (subs.length) chips.push(`<span class="chip">☰ ${subs.filter(x => x.status === 'done').length}/${subs.length}</span>`);
+  if (opts.flat && t.parent_id && taskOf(t.parent_id)) chips.push(`<span class="chip">↳ ${esc(taskOf(t.parent_id).title)}</span>`);
+  if (a && !opts.hideArea && depth === 0) chips.push(`<span class="chip"><span class="dot" style="background:${esc(a.color)}"></span>${esc(areaPathName(a.id))}</span>`);
+  if (!a && !opts.hideArea && depth === 0 && t.area_id == null) chips.push(`<span class="chip">📥 Входящие</span>`);
   if (t.due && !opts.hideDue){
     const cls = isOver(t) ? 'red' : (t.due === today() ? 'accent' : '');
     chips.push(`<span class="chip ${cls}">${isOver(t) ? '⏰ ' : ''}${fmtDue(t.due)}</span>`);
@@ -344,13 +391,16 @@ function taskRow(t, opts = {}){
   if (t.status === 'doing') chips.push(`<span class="chip violet">▶ В работе</span>`);
   if (t.status === 'waiting') chips.push(`<span class="chip amber">⏳ Ждёт</span>`);
   if (t.priority === 1 && t.status !== 'done') chips.push(`<span class="chip red">🔥</span>`);
-  return `<div class="task p${t.priority||2} ${t.status==='done'?'done':''}" data-id="${esc(t.id)}">
+  let h = `<div class="task p${t.priority||2} ${t.status==='done'?'done':''} ${depth ? 'child' : ''}" data-id="${esc(t.id)}" style="${depth ? `margin-left:${Math.min(depth, 5) * 20}px` : ''}">
     <button class="chk" data-act="toggle" aria-label="Готово"></button>
     <div class="tbody" data-act="edit">
       <div class="ttl">${esc(t.title)}</div>
       ${t.notes ? `<div class="note">${esc(t.notes)}</div>` : ''}
       ${chips.length ? `<div class="meta">${chips.join('')}</div>` : ''}
     </div></div>`;
+  if (subs.length && !opts.flat && S.expanded.has(t.id))
+    h += sortTasks(subs).map(c => taskRow(c, { ...opts, hideArea: true }, depth + 1)).join('');
+  return h;
 }
 function section(title, tasks, opts = {}){
   if (!tasks.length && !opts.keep) return '';
@@ -363,16 +413,25 @@ function doneSection(key, tasks, opts = {}){
   return `<div class="sec">Готово<span class="n">${tasks.length}</span><button class="toggle" data-act="show-done" data-k="${key}">${on ? 'скрыть' : 'показать'}</button></div>
     ${on ? `<div class="list">${tasks.map(t => taskRow(t, opts)).join('')}</div>` : ''}`;
 }
-function header(title, sub, back){
+function header(title, sub, back, extra = ''){
   const dot = cfg ? (S.syncErr ? 'err' : 'on') : '';
+  const backBtn = !back ? '' : back === 'areas'
+    ? `<button class="back" data-act="go" data-v="areas">${I.back}</button>`
+    : `<button class="back" data-act="open-area" data-v="${esc(back)}">${I.back}</button>`;
   return `<div class="hdr">
-    ${back ? `<button class="back" data-act="go" data-v="areas">${I.back}</button>` : ''}
+    ${backBtn}
     <div style="flex:1;min-width:0"><h1>${title}</h1><div class="sub"><span class="sync-dot ${dot}"></span>${sub}</div></div>
+    ${extra}
     <button class="icon-btn ${S.loading?'spin':''}" data-act="refresh" aria-label="Обновить">${I.refresh}</button>
     <button class="icon-btn" data-act="settings" aria-label="Настройки">${I.gear}</button>
   </div>`;
 }
 function quickAdd(ph){ return `<form class="quick" data-form="quick"><input name="q" placeholder="${ph}" autocomplete="off" enterkeyhint="done"><button type="submit">+</button></form>`; }
+function areaStats(id){
+  const ids = new Set(areaTree(id));
+  const ts = S.tasks.filter(t => ids.has(t.area_id));
+  return { all: ts.length, open: ts.filter(open).length, over: ts.filter(isOver).length };
+}
 
 function viewToday(){
   const td = today(), d = new Date();
@@ -387,33 +446,33 @@ function viewToday(){
     <div class="stat red"><div class="v">${over.length}</div><div class="l">просрочено</div></div>
     <div class="stat accent"><div class="v">${tod.length}</div><div class="l">на сегодня</div></div>
     <div class="stat green"><div class="v">${doneToday.length}</div><div class="l">сделано</div></div></div>`;
-  h += section('🔥 Горит', over, { cls: 'red' });
-  h += section('Сегодня', tod, { cls: 'accent', hideDue: true });
-  h += section('В работе', doing);
-  h += section('Важное без срока', hot);
+  h += section('🔥 Горит', over, { cls: 'red', flat: true });
+  h += section('Сегодня', tod, { cls: 'accent', hideDue: true, flat: true });
+  h += section('В работе', doing, { flat: true });
+  h += section('Важное без срока', hot, { flat: true });
   if (!over.length && !tod.length && !doing.length && !hot.length)
     h += `<div class="empty" style="margin-top:16px"><b>☀️</b>На сегодня ничего не горит.<br>Всего открытых задач: ${openAll}</div>`;
-  h += doneSection('today', doneToday);
+  h += doneSection('today', doneToday, { flat: true });
   return h;
 }
 
 function viewAreas(){
-  let h = header('Полки', `${S.tasks.filter(open).length} ${plural(S.tasks.filter(open).length,'открытая задача','открытые задачи','открытых задач')}`);
+  const nOpen = S.tasks.filter(open).length;
+  let h = header('Полки', `${nOpen} ${plural(nOpen,'открытая задача','открытые задачи','открытых задач')}`);
   h += `<input class="search" id="search" placeholder="🔍 Поиск по всем задачам" value="${esc(S.q)}" autocomplete="off">`;
   if (S.q.trim()){
     const q = S.q.trim().toLowerCase();
     const res = sortTasks(S.tasks.filter(t => (t.title + ' ' + (t.notes||'')).toLowerCase().includes(q)));
-    return h + (res.length ? section('Найдено', res) : `<div class="empty">Ничего не найдено</div>`);
+    return h + (res.length ? section('Найдено', res, { flat: true }) : `<div class="empty">Ничего не найдено</div>`);
   }
   const inboxN = S.tasks.filter(t => open(t) && !t.area_id).length;
   h += `<div class="areas">`;
-  for (const a of S.areas){
-    const ts = S.tasks.filter(t => t.area_id === a.id);
-    const op = ts.filter(open).length, ov = ts.filter(isOver).length, dn = ts.length - op;
-    const pct = ts.length ? Math.round(dn / ts.length * 100) : 0;
+  for (const a of kidsOf(null)){
+    const st = areaStats(a.id), nk = areaTree(a.id).length - 1;
+    const pct = st.all ? Math.round((st.all - st.open) / st.all * 100) : 0;
     h += `<button class="area" style="--c:${esc(a.color)}" data-act="open-area" data-v="${esc(a.id)}">
       <div class="em">${esc(a.emoji)}</div><div class="nm">${esc(a.name)}</div>
-      <div class="cnt">${op} ${plural(op,'задача','задачи','задач')}${ov ? ` · <span class="r">${ov} горит</span>` : ''}</div>
+      <div class="cnt">${st.open} ${plural(st.open,'задача','задачи','задач')}${nk ? ` · ${nk} ${plural(nk,'полка','полки','полок')}` : ''}${st.over ? ` · <span class="r">${st.over} горит</span>` : ''}</div>
       <div class="bar"><i style="width:${pct}%"></i></div></button>`;
   }
   h += `<button class="area" style="--c:var(--faint)" data-act="go" data-v="inbox"><div class="em">📥</div><div class="nm">Входящие</div><div class="cnt">${inboxN} ${plural(inboxN,'задача','задачи','задач')}</div></button>`;
@@ -424,20 +483,36 @@ function viewAreas(){
 function viewArea(){
   const a = areaOf(S.areaId);
   if (!a){ S.view = 'areas'; return viewAreas(); }
+  const chain = areaChain(a.id);
+  const parent = chain.length > 1 ? chain[chain.length - 2] : null;
   const ts = S.tasks.filter(t => t.area_id === a.id);
-  const op = ts.filter(open);
-  let h = header(`${esc(a.emoji)} ${esc(a.name)}`, `${op.length} ${plural(op.length,'открытая','открытые','открытых')}${ts.filter(isOver).length ? ` · ${ts.filter(isOver).length} горит` : ''}`, true);
+  const top = ts.filter(isTop);
+  const op = top.filter(open);
+  const st = areaStats(a.id);
+  const crumbs = chain.slice(0, -1).map(x => esc(x.name)).join(' › ');
+  const sub = `${crumbs ? crumbs + ' › ' : ''}${st.open} ${plural(st.open,'открытая','открытые','открытых')}${st.over ? ` · ${st.over} горит` : ''}`;
+  const editBtn = `<button class="icon-btn" data-act="edit-area" data-v="${esc(a.id)}" aria-label="Изменить полку">✎</button>`;
+  let h = header(`${esc(a.emoji)} ${esc(a.name)}`, sub, parent ? parent.id : 'areas', editBtn);
   h += quickAdd(`Добавить в «${esc(a.name)}»…`);
+  const kids = kidsOf(a.id);
+  h += `<div class="sec">Полки внутри<span class="n">${kids.length}</span></div><div class="subareas">`;
+  for (const k of kids){
+    const ks = areaStats(k.id), nk = areaTree(k.id).length - 1;
+    h += `<button class="subarea" style="--c:${esc(k.color)}" data-act="open-area" data-v="${esc(k.id)}">
+      <span>${esc(k.emoji)}</span><span class="nm">${esc(k.name)}</span>
+      <span class="cnt">${ks.open}${nk ? ` · ${nk} 🗂` : ''}${ks.over ? ` · <span class="r">${ks.over}🔥</span>` : ''}</span><span class="go">›</span></button>`;
+  }
+  h += `<button class="subarea add" data-act="new-area" data-v="${esc(a.id)}">＋ Полка внутри «${esc(a.name)}»</button></div>`;
   h += section('В работе', sortTasks(op.filter(t => t.status === 'doing')), { hideArea: true, cls: 'accent' });
   h += section('Сделать', sortTasks(op.filter(t => t.status === 'todo')), { hideArea: true });
   h += section('Ждёт', sortTasks(op.filter(t => t.status === 'waiting')), { hideArea: true, cls: 'amber' });
-  if (!op.length) h += `<div class="empty"><b>✨</b>На этой полке пусто</div>`;
-  h += doneSection('a' + a.id, sortTasks(ts.filter(t => !open(t))), { hideArea: true });
+  if (!op.length && !kids.length) h += `<div class="empty"><b>✨</b>На этой полке пусто</div>`;
+  h += doneSection('a' + a.id, sortTasks(top.filter(t => !open(t))), { hideArea: true });
   return h;
 }
 
 function viewInbox(){
-  const ts = S.tasks.filter(t => !t.area_id);
+  const ts = S.tasks.filter(t => !t.area_id && isTop(t));
   const op = sortTasks(ts.filter(open));
   let h = header('Входящие', 'Всё, что пришло в голову');
   h += quickAdd('Что пришло в голову?');
@@ -452,20 +527,20 @@ function viewPlan(){
   const op = S.tasks.filter(open);
   let h = header('План', 'Ближайшие 2 недели');
   const over = sortTasks(op.filter(isOver));
-  h += section('Просрочено', over, { cls: 'red' });
+  h += section('Просрочено', over, { cls: 'red', flat: true });
   for (let i = 0; i < 14; i++){
     const day = addDays(td, i);
     const ts = sortTasks(op.filter(t => t.due === day));
     if (!ts.length && i > 2) continue;
     const d = dObj(day);
     const title = `<span class="day-h">${i===0?'Сегодня':i===1?'Завтра':WDF[d.getDay()]}<small>${d.getDate()} ${MON[d.getMonth()]}</small></span>`;
-    h += section(title, ts, { hideDue: true, keep: true, cls: i===0 ? 'accent' : '' });
+    h += section(title, ts, { hideDue: true, keep: true, cls: i===0 ? 'accent' : '', flat: true });
     if (!ts.length) h += `<div class="hint" style="padding-left:4px">— свободно</div>`;
   }
   const later = sortTasks(op.filter(t => t.due && t.due > addDays(td, 13)));
-  h += section('Позже', later);
+  h += section('Позже', later, { flat: true });
   const none = sortTasks(op.filter(t => !t.due));
-  h += section('Без срока', none, { cls: '' });
+  h += section('Без срока', none.filter(isTop), { cls: '' });
   return h;
 }
 
@@ -526,17 +601,30 @@ function openEditor(task, defaults = {}){
   drawEditor(); setTimeout(() => { const i = $('#ed-title'); if (i && !task) i.focus(); }, 260);
 }
 function syncEd(){ const t = $('#ed-title'), n = $('#ed-notes'); if (t) ed.title = t.value; if (n) ed.notes = n.value; }
+function areaOptions(selected, excludeId){
+  const bad = excludeId ? new Set(areaTree(excludeId)) : new Set();
+  return flatAreas().filter(({ a }) => !bad.has(a.id))
+    .map(({ a, depth }) => `<option value="${esc(a.id)}" ${a.id === selected ? 'selected' : ''}>${'    '.repeat(depth)}${esc(a.emoji)} ${esc(a.name)}</option>`).join('');
+}
 function drawEditor(){
   const td = today();
   const dueChoices = [['Сегодня', td], ['Завтра', addDays(td,1)], ['Через неделю', addDays(td,7)], ['Без срока', null]];
   const customDue = ed.due && !dueChoices.some(c => c[1] === ed.due);
   const pk = (on, act, v, label) => `<button class="pick ${on?'on':''}" data-act="${act}" data-v="${v ?? ''}">${label}</button>`;
+  const par = ed.parent_id ? taskOf(ed.parent_id) : null;
+  const subs = ed._id ? sortTasks(subsOf(ed._id)) : [];
   openSheet(`
-    <h2>${ed._id ? 'Задача' : 'Новая задача'}</h2>
+    <h2>${ed._id ? (par ? 'Подзадача' : 'Задача') : (par ? 'Новая подзадача' : 'Новая задача')}</h2>
+    ${par ? `<div class="parent-link" data-act="ed-open" data-v="${esc(par.id)}">↳ внутри «${esc(par.title)}» — открыть</div>` : ''}
     <input class="fld big" id="ed-title" placeholder="Что нужно сделать?" value="${esc(ed.title)}" autocomplete="off" enterkeyhint="done">
     <textarea class="fld" id="ed-notes" placeholder="Заметка, детали, контакты…">${esc(ed.notes)}</textarea>
+    ${ed._id ? `<div class="lbl">Подзадачи${subs.length ? ` · ${subs.filter(x => x.status === 'done').length}/${subs.length}` : ''}</div>
+    <div>${subs.map(c => { const n = subsOf(c.id).length; return `<div class="subrow ${c.status==='done'?'done':''}">
+        <button class="chk" data-act="ed-sub-toggle" data-v="${esc(c.id)}"></button>
+        <span class="t" data-act="ed-open" data-v="${esc(c.id)}">${esc(c.title)}</span>${n ? `<span class="n">☰ ${n}</span>` : ''}</div>`; }).join('')}</div>
+    <form class="quick" data-form="sub" style="margin:8px 0 4px"><input id="ed-sub" placeholder="＋ Подзадача" autocomplete="off" enterkeyhint="done"><button type="submit">+</button></form>` : ''}
     <div class="lbl">Полка</div>
-    <div class="picks">${pk(!ed.area_id, 'ed-area', '', '📥 Входящие')}${S.areas.map(a => pk(ed.area_id === a.id, 'ed-area', a.id, `${esc(a.emoji)} ${esc(a.name)}`)).join('')}</div>
+    <select class="fld" id="ed-area"><option value="">📥 Входящие</option>${areaOptions(ed.area_id)}</select>
     <div class="lbl">Срок</div>
     <div class="picks">${dueChoices.map(([l, v]) => pk(ed.due === v, 'ed-due', v, l)).join('')}
       <label class="pick ${customDue?'on':''}">📅 <input type="date" id="ed-date" value="${customDue ? ed.due : ''}"></label></div>
@@ -549,20 +637,82 @@ function drawEditor(){
       <button class="btn pri" data-act="ed-save">Сохранить</button>
     </div>`, 'editor');
   $('#ed-date').addEventListener('change', e => { syncEd(); ed.due = e.target.value || null; drawEditorKeep(); });
+  $('#ed-area').addEventListener('change', e => { ed.area_id = e.target.value || null; });
   $('#ed-title').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveEditor(); } });
 }
 function drawEditorKeep(){ const sc = $('#sheet-in').scrollTop; drawEditor(); $('#sheet-in').scrollTop = sc; }
-async function saveEditor(){
+async function saveEditor(keepOpen){
   syncEd();
   const title = ed.title.trim();
-  if (!title){ toast('Напиши, что нужно сделать', true); $('#ed-title').focus(); return; }
+  if (!title){ if (keepOpen) return true; toast('Напиши, что нужно сделать', true); $('#ed-title').focus(); return false; }
   const data = { title, notes: ed.notes.trim(), area_id: ed.area_id || null, priority: ed.priority, due: ed.due || null, status: ed.status };
-  const id = ed._id; closeSheet();
+  const id = ed._id;
+  if (!keepOpen) closeSheet();
   if (id){
-    const old = S.tasks.find(t => t.id === id); if (!old) return;
+    const old = taskOf(id); if (!old) return true;
     const p = {}; for (const k in data) if ((old[k] ?? null) !== (data[k] ?? null)) p[k] = data[k];
-    if (Object.keys(p).length) await patchTask(id, p, 'Сохранено');
-  } else await createTask(data);
+    if (Object.keys(p).length) await patchTask(id, p, keepOpen ? null : 'Сохранено');
+  } else {
+    if (ed.parent_id) data.parent_id = ed.parent_id;
+    await createTask(data);
+  }
+  return true;
+}
+async function editorOpen(id){
+  await saveEditor(true);
+  const t = taskOf(id); if (t) openEditor(t);
+}
+async function editorAddSub(){
+  const inp = $('#ed-sub'); const title = inp.value.trim(); if (!title) return;
+  syncEd(); const pid = ed._id;
+  await createTask({ title, parent_id: pid, area_id: ed.area_id || null });
+  S.expanded.add(pid); LS.set('tc_exp', [...S.expanded]);
+  if (ed && ed._id === pid){ drawEditorKeep(); const i = $('#ed-sub'); if (i) i.focus(); }
+}
+
+// ================= shelves editor =================
+function openAreaEditor(area, parentId){
+  const a = area || { name: '', emoji: '📁', color: (areaOf(parentId)||{}).color || '#6c8cff', parent_id: parentId || null };
+  const nT = area ? S.tasks.filter(t => t.area_id === area.id).length : 0, nK = area ? kidsOf(area.id).length : 0;
+  openSheet(`
+    <h2>${area ? 'Полка' : (parentId ? 'Полка внутри «' + esc(areaOf(parentId).name) + '»' : 'Новая полка')}</h2>
+    <div class="arow"><input class="fld em-in" id="ae-em" value="${esc(a.emoji)}" maxlength="4"><input class="fld" id="ae-name" placeholder="Название" value="${esc(a.name)}" autocomplete="off"><input type="color" id="ae-color" value="${esc(a.color)}"></div>
+    <div class="lbl">Где лежит</div>
+    <select class="fld" id="ae-parent"><option value="">— верхний уровень —</option>${areaOptions(a.parent_id, area ? area.id : null)}</select>
+    ${area && (nT || nK) ? `<div class="hint">Внутри: ${nT} ${plural(nT,'задача','задачи','задач')}, ${nK} ${plural(nK,'полка','полки','полок')}. При удалении они переедут уровнем выше.</div>` : ''}
+    <div class="row">
+      ${area ? `<button class="btn danger" data-act="ae-del" data-v="${esc(area.id)}">Удалить</button>` : `<button class="btn" data-act="close">Отмена</button>`}
+      <button class="btn pri" data-act="ae-save" data-v="${area ? esc(area.id) : ''}">Сохранить</button>
+    </div>`, 'area');
+  setTimeout(() => { const i = $('#ae-name'); if (i && !area) i.focus(); }, 260);
+  $('#ae-name').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveArea(area ? area.id : ''); } });
+}
+async function saveArea(id){
+  const name = $('#ae-name').value.trim(), emoji = $('#ae-em').value.trim() || '📁', color = $('#ae-color').value, parent_id = $('#ae-parent').value || null;
+  if (!name){ toast('Напиши название полки', true); return; }
+  closeSheet();
+  if (id){
+    const a = areaOf(id); if (!a) return;
+    const p = {}; if (a.name !== name) p.name = name; if (a.emoji !== emoji) p.emoji = emoji; if (a.color !== color) p.color = color;
+    if ((a.parent_id||null) !== parent_id) p.parent_id = parent_id;
+    if (!Object.keys(p).length) return;
+    await act(() => Object.assign(a, p), () => api().updateArea(id, p), 'Полка сохранена');
+    cacheSave();
+  } else {
+    const tmp = { id: 'tmp-' + uid(), name, emoji, color, parent_id, sort: 999 };
+    const r = await act(() => S.areas.push(tmp), () => api().addArea({ name, emoji, color, parent_id }), 'Полка создана');
+    if (r){ const i = S.areas.indexOf(tmp); if (i >= 0) S.areas[i] = r; cacheSave(); render(); }
+  }
+}
+async function deleteArea(id){
+  const ar = areaOf(id); if (!ar) return;
+  if (!await confirmBox(`Удалить полку «${esc(ar.name)}»? Её задачи и полки переедут уровнем выше.`)) return;
+  closeSheet();
+  const par = ar.parent_id || null;
+  await act(() => { S.areas.forEach(x => { if (x.parent_id === id) x.parent_id = par; }); S.tasks.forEach(t => { if (t.area_id === id) t.area_id = par; }); S.areas = S.areas.filter(x => x.id !== id); },
+            () => api().deleteArea(id), 'Полка удалена');
+  cacheSave();
+  if (S.view === 'area' && S.areaId === id){ if (par){ S.areaId = par; go('area'); } else go('areas'); }
 }
 
 // ================= settings =================
@@ -593,11 +743,9 @@ function openSettings(){
     <button class="btn" style="width:100%" data-act="s-gpt" ${cfg?'':'disabled'}>Настройки для ChatGPT</button>
 
     <h3>🗂 Полки</h3>
-    <div id="s-areas">${S.areas.map(a => `<div class="arow" data-aid="${esc(a.id)}">
-        <input class="fld em-in" value="${esc(a.emoji)}" data-f="emoji" maxlength="4">
-        <input class="fld" value="${esc(a.name)}" data-f="name">
-        <input type="color" value="${esc(a.color)}" data-f="color">
-        <button class="del" data-act="s-del-area" data-v="${esc(a.id)}">✕</button></div>`).join('')}</div>
+    <div id="s-areas">${flatAreas().map(({ a, depth }) => `<div class="arow" style="margin-left:${depth * 18}px">
+        <button class="fld" style="text-align:left" data-act="edit-area" data-v="${esc(a.id)}"><span class="dot" style="background:${esc(a.color)};margin-right:8px"></span>${esc(a.emoji)} ${esc(a.name)}</button>
+        <button class="del" data-act="new-area" data-v="${esc(a.id)}" style="color:var(--accent)">＋</button></div>`).join('')}</div>
     <button class="btn" style="width:100%;margin-top:4px" data-act="new-area">＋ Добавить полку</button>
 
     <h3>💾 Резервная копия</h3>
@@ -605,16 +753,8 @@ function openSettings(){
       <button class="btn" data-act="s-export">Скачать JSON</button>
       <button class="btn" data-act="s-import">Загрузить JSON</button>
     </div>
-    <div class="hint" style="margin-top:18px;text-align:center;color:var(--faint)">Центр задач · v1.1</div>
+    <div class="hint" style="margin-top:18px;text-align:center;color:var(--faint)">Центр задач · v2.0</div>
   `, 'settings');
-  $('#s-areas').addEventListener('change', async e => {
-    const row = e.target.closest('.arow'); if (!row) return;
-    const id = row.dataset.aid, f = e.target.dataset.f, v = e.target.value.trim();
-    if (!v) return;
-    const a = areaOf(id); if (!a) return;
-    await act(() => { a[f] = v; }, () => api().updateArea(id, { [f]: v }), 'Полка сохранена');
-    cacheSave();
-  });
 }
 
 async function connectCloud(){
@@ -635,19 +775,24 @@ async function connectCloud(){
     if (ok) await migrate(local);
   }
 }
+function byDepth(list, key){
+  const ids = new Map(list.map(x => [x.id, x])); const d = x => { let n = 0, p = x; while (p && p[key] && ids.has(p[key]) && n < 30){ p = ids.get(p[key]); n++; } return n; };
+  return list.slice().sort((a, b) => d(a) - d(b));
+}
 async function migrate(src){
   toast('Переношу…');
   try{
-    const have = new Map(S.areas.map(a => [a.name.toLowerCase(), a.id]));
-    const map = {};
-    for (const a of src.areas){
-      let id = have.get(a.name.toLowerCase());
-      if (!id){ const n = await Cloud.addArea(a); id = n.id; have.set(a.name.toLowerCase(), id); }
-      map[a.id] = id;
+    const amap = {}, tmap = {};
+    for (const a of byDepth(src.areas, 'parent_id')){
+      const par = a.parent_id ? (amap[a.parent_id] || null) : null;
+      const same = S.areas.find(x => x.name.toLowerCase() === String(a.name).toLowerCase() && (x.parent_id||null) === par);
+      if (same){ amap[a.id] = same.id; continue; }
+      const n = await Cloud.addArea({ ...a, parent_id: par }); amap[a.id] = n.id; S.areas.push(n);
     }
     let n = 0;
-    for (const t of src.tasks){
-      await Cloud.addTask({ ...t, area_id: t.area_id ? (map[t.area_id] || null) : null }); n++;
+    for (const t of byDepth(src.tasks, 'parent_id')){
+      const r = await Cloud.addTask({ ...t, area_id: t.area_id ? (amap[t.area_id] || null) : null, parent_id: t.parent_id ? (tmap[t.parent_id] || null) : null });
+      tmap[t.id] = r.id; n++;
     }
     await reload(true); toast(`Перенесено: ${n}`);
     return true;
@@ -687,34 +832,18 @@ async function importJson(file){
     if (!await confirmBox(`Добавить ${d.tasks.length} ${plural(d.tasks.length,'задачу','задачи','задач')} из файла к текущим?`, 'Добавить')) return;
     if (cfg){ closeSheet(); await migrate(d); }
     else{
-      const db = Local.load(); const have = new Map(db.areas.map(a => [a.name.toLowerCase(), a.id])); const map = {};
-      for (const a of d.areas){ let id = have.get(String(a.name).toLowerCase()); if (!id){ id = uid(); db.areas.push({ ...a, id }); have.set(a.name.toLowerCase(), id); } map[a.id] = id; }
-      for (const t of d.tasks) db.tasks.push({ ...t, id: uid(), area_id: t.area_id ? (map[t.area_id] || null) : null });
+      const db = Local.load(); const map = {}, tmap = {};
+      for (const a of byDepth(d.areas, 'parent_id')){
+        const par = a.parent_id ? (map[a.parent_id] || null) : null;
+        const same = db.areas.find(x => x.name.toLowerCase() === String(a.name).toLowerCase() && (x.parent_id||null) === par);
+        if (same){ map[a.id] = same.id; continue; }
+        const id = uid(); db.areas.push({ ...a, id, parent_id: par }); map[a.id] = id;
+      }
+      for (const t of byDepth(d.tasks, 'parent_id')){ const id = uid(); tmap[t.id] = id;
+        db.tasks.push({ ...t, id, area_id: t.area_id ? (map[t.area_id] || null) : null, parent_id: t.parent_id ? (tmap[t.parent_id] || null) : null }); }
       Local.save(db); closeSheet(); await reload(); toast('Импортировано');
     }
   }catch(e){ toast('Не удалось прочитать файл: ' + e.message, true); }
-}
-
-async function newArea(){
-  closeSheet();
-  $('#modal-in').innerHTML = `<p>Новая полка</p>
-    <div class="arow" style="margin-top:12px"><input class="fld em-in" id="na-em" value="📁" maxlength="4"><input class="fld" id="na-name" placeholder="Название"></div>
-    <div class="row"><button class="btn" id="m-no">Отмена</button><button class="btn pri" id="m-yes">Создать</button></div>`;
-  $('#modal').classList.add('show'); setTimeout(() => $('#na-name').focus(), 50);
-  const close = () => $('#modal').classList.remove('show');
-  $('#m-no').onclick = close;
-  const ok = async () => {
-    const name = $('#na-name').value.trim(), emoji = $('#na-em').value.trim() || '📁';
-    if (!name) return;
-    close();
-    const colors = ['#6c8cff','#a78bfa','#4cc38a','#f5b84c','#ff8a8a','#38bdf8','#f472b6','#facc15'];
-    const color = colors[S.areas.length % colors.length];
-    const tmp = { id: 'tmp-' + uid(), name, emoji, color, sort: 999 };
-    const r = await act(() => S.areas.push(tmp), () => api().addArea({ name, emoji, color }), 'Полка создана');
-    if (r){ const i = S.areas.indexOf(tmp); if (i >= 0) S.areas[i] = r; cacheSave(); render(); }
-  };
-  $('#m-yes').onclick = ok;
-  $('#na-name').onkeydown = e => { if (e.key === 'Enter') ok(); };
 }
 
 // ================= ChatGPT setup =================
@@ -725,7 +854,9 @@ function gptSchema(){
     operationId: id, summary, 'x-openai-isConsequential': consequential,
     requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['p_key', ...req], properties: { p_key: KEY, ...props } } } } },
     responses: ok } });
-  const area = { type: 'string', description: 'Название полки (например "Store 457") или её id. Не указывай — задача попадёт во «Входящие».' };
+  const area = { type: 'string', description: 'Полка: путь через / (например "EV77 / Авито"), название или id. Не указывай — задача попадёт во «Входящие» (у подзадачи — на полку родителя).' };
+  const parent = { type: 'string', format: 'uuid', description: 'id родительской задачи — тогда это подзадача' };
+  const parentArea = { type: 'string', description: 'Родительская полка: путь, название или id. Пусто — верхний уровень.' };
   const prio = { type: 'integer', enum: [1,2,3], description: '1 — высокий/срочно, 2 — обычный, 3 — низкий' };
   const due = { type: 'string', format: 'date', description: 'Срок в формате ГГГГ-ММ-ДД' };
   const status = { type: 'string', enum: ['todo','doing','waiting','done'], description: 'todo — сделать, doing — в работе, waiting — ждёт кого-то, done — готово' };
@@ -737,14 +868,15 @@ function gptSchema(){
       '/rpc/tm_list': op('listTasks', 'Все полки и задачи (открытые + выполненные за p_done_days дней) и сегодняшняя дата today (Москва)',
         { p_done_days: { type: 'integer', default: 7 } }, []),
       '/rpc/tm_add_task': op('addTask', 'Добавить задачу',
-        { p_title: { type: 'string' }, p_notes: { type: 'string' }, p_area: area, p_priority: prio, p_due: due, p_status: status }, ['p_title']),
+        { p_title: { type: 'string' }, p_notes: { type: 'string' }, p_area: area, p_priority: prio, p_due: due, p_status: status, p_parent: parent }, ['p_title']),
       '/rpc/tm_update_task': op('updateTask', 'Изменить задачу. Передавай только то, что меняется.',
         { p_id: { type: 'string', format: 'uuid' }, p_title: { type: 'string' }, p_notes: { type: 'string' }, p_area: area, p_priority: prio, p_due: due, p_status: status,
-          p_clear_due: { type: 'boolean', description: 'true — убрать срок' }, p_clear_area: { type: 'boolean', description: 'true — переложить во «Входящие»' } }, ['p_id']),
+          p_clear_due: { type: 'boolean', description: 'true — убрать срок' }, p_clear_area: { type: 'boolean', description: 'true — переложить во «Входящие»' },
+          p_parent: { ...parent, description: 'Сделать подзадачей этой задачи' }, p_clear_parent: { type: 'boolean', description: 'true — вынести на верхний уровень' } }, ['p_id']),
       '/rpc/tm_delete_task': op('deleteTask', 'Удалить задачу навсегда', { p_id: { type: 'string', format: 'uuid' } }, ['p_id'], true),
-      '/rpc/tm_add_area': op('addArea', 'Создать новую полку', { p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string', description: 'HEX цвет, например #6c8cff' } }, ['p_name']),
-      '/rpc/tm_update_area': op('updateArea', 'Переименовать или изменить полку', { p_id: { type: 'string', format: 'uuid' }, p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string' }, p_sort: { type: 'integer' } }, ['p_id']),
-      '/rpc/tm_delete_area': op('deleteArea', 'Удалить полку (её задачи уйдут во «Входящие»)', { p_id: { type: 'string', format: 'uuid' } }, ['p_id'], true)
+      '/rpc/tm_add_area': op('addArea', 'Создать полку (в т.ч. внутри другой полки через p_parent)', { p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string', description: 'HEX цвет, например #6c8cff' }, p_parent: parentArea }, ['p_name']),
+      '/rpc/tm_update_area': op('updateArea', 'Переименовать, изменить или переместить полку', { p_id: { type: 'string', format: 'uuid' }, p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string' }, p_sort: { type: 'integer' }, p_parent: parentArea, p_clear_parent: { type: 'boolean', description: 'true — сделать полкой верхнего уровня' } }, ['p_id']),
+      '/rpc/tm_delete_area': op('deleteArea', 'Удалить полку (её задачи и подполки переедут уровнем выше)', { p_id: { type: 'string', format: 'uuid' } }, ['p_id'], true)
     }
   };
 }
@@ -753,7 +885,10 @@ const GPT_INSTRUCTIONS = `Ты — помощник по личному Цент
 Как работать с задачами:
 - Перед любым ответом о задачах или изменением сначала вызови listTasks — так ты узнаешь актуальные id, полки и сегодняшнюю дату (поле today, время московское).
 - Даты передавай в формате ГГГГ-ММ-ДД. «Завтра», «в пятницу», «через неделю» считай от today.
-- Полку передавай названием в p_area (например "Store 457", "EV77"). Если непонятно, куда положить, — не указывай полку: задача попадёт во «Входящие».
+- Полки бывают вложенными (у каждой полки в listTasks есть path, например "EV77 / Авито"). В p_area передавай path. Если непонятно, куда положить, — не указывай полку: задача попадёт во «Входящие».
+- Подзадачи: у задачи есть parent_id. Чтобы добавить подзадачу — addTask с p_parent = id родителя (полку можно не указывать, возьмётся у родителя). Вложенность любая: у подзадач бывают свои подзадачи.
+- Если я прошу «разбей задачу на шаги» — создай подзадачи.
+- Новая полка внутри другой — addArea с p_parent (путь родителя).
 - Приоритет: 1 — срочно/важно, 2 — обычный (по умолчанию), 3 — низкий.
 - Статусы: todo — сделать, doing — в работе, waiting — ждёт кого-то/чего-то, done — готово.
 - «Сделал», «закрой», «готово» → updateTask с p_status="done".
@@ -766,7 +901,8 @@ const GPT_INSTRUCTIONS = `Ты — помощник по личному Цент
 - После изменений — одна-две строки: что сделал.
 - На «что на сегодня?», «что горит?» — покажи просроченное и задачи на сегодня, сгруппируй по полкам, срочные первыми.
 - На «разбери входящие» — предложи, на какие полки и с какими сроками разложить задачи без полки, и после моего «да» сделай.
-- На «план на неделю» — задачи на 7 дней вперёд по дням.`;
+- На «план на неделю» — задачи на 7 дней вперёд по дням.
+- Показывая задачи, выводи подзадачи деревом с отступами и отметкой ✅ у выполненных.`;
 
 function openGpt(){
   const schema = JSON.stringify(gptSchema(), null, 2);
@@ -805,8 +941,14 @@ document.addEventListener('click', async e => {
   switch (a){
     case 'go': go(v); break;
     case 'open-area': S.areaId = v; go('area'); break;
+    case 'expand': { if (S.expanded.has(tid)) S.expanded.delete(tid); else S.expanded.add(tid); LS.set('tc_exp', [...S.expanded]); render(); break; }
+    case 'edit-area': { const ar = areaOf(v); if (ar) openAreaEditor(ar); break; }
+    case 'ae-save': saveArea(v); break;
+    case 'ae-del': deleteArea(v); break;
+    case 'ed-open': editorOpen(v); break;
+    case 'ed-sub-toggle': { syncEd(); toggleDone(v); setTimeout(drawEditorKeep, 0); break; }
     case 'toggle': toggleDone(tid); break;
-    case 'edit': { const t = S.tasks.find(x => x.id === tid); if (t) openEditor(t); break; }
+    case 'edit': { if (e.target.closest('[data-act="expand"]')) break; const t = S.tasks.find(x => x.id === tid); if (t) openEditor(t); break; }
     case 'new': {
       const d = {};
       if (S.view === 'today') d.due = today();
@@ -817,14 +959,13 @@ document.addEventListener('click', async e => {
     case 'settings': openSettings(); break;
     case 'close': closeSheet(); break;
     case 'show-done': S.showDone[el.dataset.k] = !S.showDone[el.dataset.k]; render(); break;
-    case 'new-area': newArea(); break;
+    case 'new-area': openAreaEditor(null, v || null); break;
     // editor
-    case 'ed-area': syncEd(); ed.area_id = v || null; drawEditorKeep(); break;
     case 'ed-due': syncEd(); ed.due = v || null; drawEditorKeep(); break;
     case 'ed-prio': syncEd(); ed.priority = Number(v); drawEditorKeep(); break;
     case 'ed-status': syncEd(); ed.status = v; drawEditorKeep(); break;
     case 'ed-save': saveEditor(); break;
-    case 'ed-del': { const id = ed._id; if (await confirmBox('Удалить задачу навсегда?')){ closeSheet(); removeTask(id); } break; }
+    case 'ed-del': { const id = ed._id; const nd = taskDesc(id).length; if (await confirmBox(`Удалить задачу${nd ? ` и ${nd} ${plural(nd,'подзадачу','подзадачи','подзадач')}` : ''} навсегда?`)){ closeSheet(); removeTask(id); } break; }
     // settings
     case 's-connect': connectCloud(); break;
     case 's-disconnect': disconnect(); break;
@@ -833,18 +974,11 @@ document.addEventListener('click', async e => {
     case 'w-skip': LS.set('tc_skip_cloud', true); closeSheet(); break;
     case 's-export': exportJson(); break;
     case 's-import': $('#file-in').click(); break;
-    case 's-del-area': {
-      const ar = areaOf(v); if (!ar) break;
-      const n = S.tasks.filter(t => t.area_id === v).length;
-      if (!await confirmBox(`Удалить полку «${esc(ar.name)}»?${n ? ` ${n} ${plural(n,'задача уйдёт','задачи уйдут','задач уйдут')} во «Входящие».` : ''}`)) break;
-      await act(() => { S.areas = S.areas.filter(x => x.id !== v); S.tasks.forEach(t => { if (t.area_id === v) t.area_id = null; }); },
-                () => api().deleteArea(v), 'Полка удалена');
-      cacheSave(); openSettings(); break;
-    }
     case 'copy': copyText($('#' + el.dataset.src).textContent); break;
   }
 });
 document.addEventListener('submit', e => {
+  if (e.target.closest('[data-form="sub"]')){ e.preventDefault(); editorAddSub(); return; }
   const f = e.target.closest('[data-form="quick"]'); if (!f) return;
   e.preventDefault();
   const inp = f.querySelector('input'); const title = inp.value.trim(); if (!title) return;
