@@ -194,6 +194,12 @@ const DEFAULT_AREAS = [
 
 // ================= backends =================
 let cfg = LS.get('tc_cfg', null);   // {url, anon, key}
+const CLOUD = { url: 'https://sjxhgnssuqimehpyiflm.supabase.co', anon: 'sb_publishable_CX0K45yuIk6o0UkuLYYgBg_jMqtuA-k' };
+// вход по ссылке: …/tasks/#key=XXXX (ключ сразу убирается из адреса)
+(() => {
+  const m = location.hash.match(/key=([0-9a-f]{32})/i);
+  if (m){ cfg = { ...CLOUD, key: m[1].toLowerCase() }; LS.set('tc_cfg', cfg); history.replaceState(null, '', location.pathname); }
+})();
 
 const Local = {
   load(){
@@ -569,14 +575,18 @@ function openSettings(){
     <div class="status-box">${st}</div>
 
     <h3>☁️ Облако (Supabase)</h3>
-    <div class="hint">Нужно, чтобы задачи были на всех устройствах и ChatGPT мог их менять. Как получить ключи — в README.</div>
-    <input class="fld" id="s-url" placeholder="Project URL: https://xxxx.supabase.co" value="${esc(c.url||'')}" autocomplete="off" autocapitalize="off">
-    <input class="fld" id="s-anon" placeholder="Publishable / anon key" value="${esc(c.anon||'')}" autocomplete="off" autocapitalize="off">
-    <input class="fld" id="s-key" placeholder="Ключ приложения (app_key из SQL)" value="${esc(c.key||'')}" autocomplete="off" autocapitalize="off">
+    <div class="hint">Задачи общие на всех устройствах и в ChatGPT. Ключ вводится один раз на устройстве.</div>
+    <input class="fld" id="s-key" placeholder="Ключ приложения" value="${esc(c.key||'')}" autocomplete="off" autocapitalize="off">
+    <details style="margin-bottom:10px"><summary class="hint" style="cursor:pointer">Другой проект Supabase</summary>
+      <input class="fld" id="s-url" placeholder="Project URL: https://xxxx.supabase.co" value="${esc(c.url||CLOUD.url)}" autocomplete="off" autocapitalize="off">
+      <input class="fld" id="s-anon" placeholder="Publishable / anon key" value="${esc(c.anon||CLOUD.anon)}" autocomplete="off" autocapitalize="off">
+    </details>
     <div class="row" style="margin-top:4px">
       ${cfg ? `<button class="btn" data-act="s-disconnect">Отключить</button>` : ''}
       <button class="btn pri" data-act="s-connect">${cfg ? 'Сохранить' : 'Подключить'}</button>
     </div>
+    ${cfg ? `<button class="btn" style="width:100%;margin-top:8px" data-act="s-link">📲 Подключить другое устройство</button>
+    <div class="hint">Отправь ссылку себе (например, в «Избранное» Telegram) и открой на телефоне — подключится без ввода ключа. Никому её не пересылай.</div>` : ''}
 
     <h3>🤖 ChatGPT</h3>
     <div class="hint">${cfg ? 'Получи готовую схему и инструкцию для своего GPT — значения уже подставлены.' : 'Сначала подключи облако.'}</div>
@@ -595,7 +605,7 @@ function openSettings(){
       <button class="btn" data-act="s-export">Скачать JSON</button>
       <button class="btn" data-act="s-import">Загрузить JSON</button>
     </div>
-    <div class="hint" style="margin-top:18px;text-align:center;color:var(--faint)">Центр задач · v1.0</div>
+    <div class="hint" style="margin-top:18px;text-align:center;color:var(--faint)">Центр задач · v1.1</div>
   `, 'settings');
   $('#s-areas').addEventListener('change', async e => {
     const row = e.target.closest('.arow'); if (!row) return;
@@ -608,9 +618,9 @@ function openSettings(){
 }
 
 async function connectCloud(){
-  const url = $('#s-url').value.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
-  const anon = $('#s-anon').value.trim(), key = $('#s-key').value.trim();
-  if (!/^https?:\/\//.test(url) || !anon || !key){ toast('Заполни все три поля', true); return; }
+  const url = ($('#s-url')?.value.trim() || CLOUD.url).replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
+  const anon = $('#s-anon')?.value.trim() || CLOUD.anon, key = ($('#s-key') || $('#w-key')).value.trim();
+  if (!/^https?:\/\//.test(url) || !anon || !key){ toast('Введи ключ приложения', true); return; }
   const c = { url, anon, key };
   toast('Проверяю подключение…');
   try{ await rpc('tm_list', { p_done_days: 0 }, c); }
@@ -642,6 +652,21 @@ async function migrate(src){
     await reload(true); toast(`Перенесено: ${n}`);
     return true;
   }catch(e){ toast('Ошибка переноса: ' + e.message, true); await reload(true); return false; }
+}
+function openWelcome(){
+  openSheet(`
+    <h2>👋 Центр задач</h2>
+    <div class="hint">Введи ключ приложения — и задачи станут общими на всех устройствах и в ChatGPT. Это нужно один раз на каждом устройстве.</div>
+    <input class="fld" id="w-key" placeholder="Ключ приложения" autocomplete="off" autocapitalize="off">
+    <div class="row">
+      <button class="btn" data-act="w-skip">Пока без облака</button>
+      <button class="btn pri" data-act="s-connect">Подключить</button>
+    </div>`, 'welcome');
+}
+async function shareLink(){
+  const link = location.origin + location.pathname + '#key=' + cfg.key;
+  if (navigator.share){ try{ await navigator.share({ title: 'Центр задач', text: 'Подключение Центра задач', url: link }); return; }catch(e){ if (e.name === 'AbortError') return; } }
+  copyText(link);
 }
 async function disconnect(){
   if (!await confirmBox('Отключить облако? Задачи в облаке останутся, приложение вернётся к локальным данным этого устройства.', 'Отключить')) return;
@@ -804,6 +829,8 @@ document.addEventListener('click', async e => {
     case 's-connect': connectCloud(); break;
     case 's-disconnect': disconnect(); break;
     case 's-gpt': openGpt(); break;
+    case 's-link': shareLink(); break;
+    case 'w-skip': LS.set('tc_skip_cloud', true); closeSheet(); break;
     case 's-export': exportJson(); break;
     case 's-import': $('#file-in').click(); break;
     case 's-del-area': {
@@ -848,6 +875,7 @@ setInterval(() => { if (today() !== lastDay){ lastDay = today(); render(); } }, 
 if (cfg){ const c = LS.get('tc_cache', null); if (c){ S.areas = c.areas || []; S.tasks = c.tasks || []; } }
 render();
 reload(true);
+if (!cfg && !LS.get('tc_skip_cloud', false)) setTimeout(openWelcome, 300);
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
