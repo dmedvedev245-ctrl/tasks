@@ -19,7 +19,7 @@
 :root{
   --bg:#0e1422; --surface:#161e30; --surface2:#1d2740; --line:#26314d;
   --text:#e7ecf5; --muted:#8a96ad; --faint:#5d6984;
-  --accent:#6c8cff; --accent2:#4f6fe8; --red:#ff6b6b; --amber:#f5b84c; --green:#4cc38a; --violet:#a78bfa;
+  --accent:#6c8cff; --red:#ff6b6b; --amber:#f5b84c; --green:#4cc38a; --violet:#a78bfa;
   --r:14px; --sb:env(safe-area-inset-bottom,0px); --st:env(safe-area-inset-top,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -27,154 +27,203 @@ html,body{margin:0;background:var(--bg);color:var(--text);font-family:Manrope,sy
 body{min-height:100dvh;overscroll-behavior-y:contain}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
-.app{max-width:680px;margin:0 auto;padding:calc(var(--st) + 14px) 16px calc(var(--sb) + 96px)}
-
-.hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.hdr .back{width:36px;height:36px;border-radius:10px;background:var(--surface);display:grid;place-items:center;flex:none}
-.hdr h1{font-size:26px;font-weight:800;margin:0;letter-spacing:-.02em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hdr .sub{font-size:13px;color:var(--muted);font-weight:500;margin-top:2px}
-.icon-btn{width:38px;height:38px;border-radius:12px;background:var(--surface);display:grid;place-items:center;flex:none;color:var(--muted)}
+.app{max-width:760px;margin:0 auto;padding:calc(var(--st) + 14px) 16px calc(var(--sb) + 110px)}
+.hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.hdr h1{font-size:26px;font-weight:800;margin:0;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdr .sub{font-size:13px;color:var(--muted);font-weight:500;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icon-btn{width:44px;height:44px;border-radius:12px;background:var(--surface);display:grid;place-items:center;flex:none;color:var(--muted);font-size:18px}
 .icon-btn:active{background:var(--surface2)}
-.icon-btn svg,.back svg{width:20px;height:20px}
+.icon-btn svg{width:20px;height:20px}
 .spin svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--faint);display:inline-block;margin-right:6px;vertical-align:middle}
-.sync-dot.on{background:var(--green)} .sync-dot.err{background:var(--red)}
-
-.quick{display:flex;gap:8px;margin-bottom:18px}
-.quick input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px;outline:none}
-.quick input:focus{border-color:var(--accent)}
-.quick button{background:var(--accent);color:#fff;border-radius:var(--r);padding:0 16px;font-weight:700}
-
-.sec{margin:20px 0 8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sync-dot.on{background:var(--green)} .sync-dot.err{background:var(--red)} .sync-dot.wait{background:var(--amber)}
+.banner{display:flex;align-items:center;gap:10px;background:rgba(245,184,76,.12);border:1px solid rgba(245,184,76,.35);color:var(--amber);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px;font-weight:600}
+.banner span{flex:1;min-width:0}
+.banner button{padding:8px 12px;border-radius:10px;background:var(--surface2);color:var(--text);font-size:13px;font-weight:700;min-height:36px}
+.sec{margin:22px 0 10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .sec .n{background:var(--surface2);color:var(--muted);border-radius:20px;padding:1px 8px;font-size:12px;letter-spacing:0}
-.sec.red{color:var(--red)} .sec.amber{color:var(--amber)} .sec.accent{color:var(--accent)}
-.sec .toggle{margin-left:auto;font-size:12px;text-transform:none;letter-spacing:0;color:var(--faint)}
+.sec.red{color:var(--red)} .sec.amber{color:var(--amber)} .sec.accent{color:var(--accent)} .sec.green{color:var(--green)}
+.sec .toggle{margin-left:auto;font-size:13px;text-transform:none;letter-spacing:0;color:var(--accent);padding:8px 4px;min-height:36px}
 .list{display:flex;flex-direction:column;gap:6px}
-.task{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border-radius:var(--r);padding:12px 14px;border-left:3px solid transparent;transition:opacity .2s}
-.task.p1{border-left-color:var(--red)} .task.p3{opacity:.85}
-.task.done{opacity:.5} .task.done .ttl{text-decoration:line-through;color:var(--muted)}
-.chk{width:24px;height:24px;border-radius:50%;border:2px solid var(--faint);flex:none;margin-top:1px;display:grid;place-items:center}
-.task.p1 .chk{border-color:var(--red)}
-.task.done .chk{background:var(--green);border-color:var(--green)}
-.task.done .chk::after{content:"";width:6px;height:11px;border:solid #0e1422;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
-.tbody{flex:1;min-width:0;cursor:pointer}
-.ttl{font-weight:600;line-height:1.35;word-wrap:break-word}
-.note{font-size:13px;color:var(--muted);margin-top:3px;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hint{font-size:13px;color:var(--muted);line-height:1.5;margin:6px 0 10px}
+.empty{text-align:center;color:var(--muted);padding:28px 16px;background:var(--surface);border-radius:var(--r);font-size:15px;line-height:1.5}
+.empty b{display:block;font-size:26px;margin-bottom:6px}
+.empty .btn{margin-top:14px;width:100%}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.chip{font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--muted);display:inline-flex;align-items:center;gap:4px}
+.chip{font-size:12px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--surface2);color:var(--muted);display:inline-flex;align-items:center;gap:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip.red{color:var(--red);background:rgba(255,107,107,.12)}
 .chip.amber{color:var(--amber);background:rgba(245,184,76,.12)}
 .chip.accent{color:var(--accent);background:rgba(108,140,255,.14)}
 .chip.violet{color:var(--violet);background:rgba(167,139,250,.14)}
-.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
-.empty{text-align:center;color:var(--muted);padding:36px 16px;background:var(--surface);border-radius:var(--r);font-size:15px;line-height:1.5}
-.empty b{display:block;font-size:28px;margin-bottom:6px}
-
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
-.stat{background:var(--surface);border-radius:var(--r);padding:12px}
-.stat .v{font-size:24px;font-weight:800} .stat .l{font-size:12px;color:var(--muted);font-weight:600}
-.stat.red .v{color:var(--red)} .stat.accent .v{color:var(--accent)} .stat.green .v{color:var(--green)}
-
-.search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;outline:none;margin-bottom:14px}
-.search:focus{border-color:var(--accent)}
-.areas{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.area{background:var(--surface);border-radius:var(--r);padding:14px;text-align:left;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;min-height:110px}
-.area::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c)}
-.area .em{font-size:24px}
-.area .nm{font-weight:700;font-size:16px;line-height:1.2}
-.area .cnt{font-size:13px;color:var(--muted);margin-top:auto}
-.area .cnt .r{color:var(--red);font-weight:700}
-.area:active{background:var(--surface2)}
-.bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--c)}
-
-.nav{position:fixed;left:0;right:0;bottom:0;background:rgba(14,20,34,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 8px calc(var(--sb) + 6px);z-index:10}
-.nav-in{max-width:680px;margin:0 auto;display:flex;align-items:center}
-.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--faint);padding:6px 0;position:relative}
-.nav button svg{width:22px;height:22px}
-.nav button.on{color:var(--accent)}
-.nav .badge{position:absolute;top:2px;left:calc(50% + 6px);background:var(--red);color:#fff;font-size:10px;border-radius:10px;padding:0 5px;line-height:16px;min-width:16px}
-.fab{width:54px;height:54px;border-radius:18px;background:var(--accent);color:#fff;display:grid;place-items:center;margin:-22px 6px 0;box-shadow:0 8px 24px rgba(108,140,255,.4);flex:none}
-.fab svg{width:26px;height:26px}
-
-.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
-.backdrop.show{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);max-height:92dvh;display:flex;justify-content:center}
-.sheet.show{transform:none}
-.sheet-in{background:var(--surface);width:100%;max-width:680px;border-radius:22px 22px 0 0;padding:10px 18px calc(var(--sb) + 18px);overflow-y:auto;max-height:92dvh}
-.grab{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 14px}
-.sheet h2{margin:0 0 14px;font-size:20px;font-weight:800}
-.sheet h3{margin:22px 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.fld{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;outline:none;margin-bottom:10px}
-.fld:focus{border-color:var(--accent)}
-textarea.fld{min-height:76px;resize:vertical}
-.fld.big{font-size:18px;font-weight:600}
-.lbl{font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.06em}
-.picks{display:flex;flex-wrap:wrap;gap:6px}
-.pick{padding:7px 12px;border-radius:20px;background:var(--bg);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
-.pick.on{background:rgba(108,140,255,.16);border-color:var(--accent);color:var(--text)}
-.pick input[type=date]{background:none;border:0;outline:none;color:inherit;font-size:14px;width:130px;padding:0}
-.pick input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
-.row{display:flex;gap:8px;margin-top:20px}
-.btn{flex:1;padding:14px;border-radius:14px;font-weight:700;background:var(--surface2);text-align:center}
-.btn.pri{background:var(--accent);color:#fff}
-.btn.danger{color:var(--red);flex:0 0 auto;padding:14px 18px}
-.btn.sm{flex:0 0 auto;padding:10px 14px;font-size:14px}
-.btn:disabled{opacity:.5}
-.hint{font-size:13px;color:var(--muted);line-height:1.5;margin:6px 0 10px}
-.hint code{background:var(--bg);padding:1px 6px;border-radius:6px;font-size:12px}
-.status-box{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;display:flex;align-items:center}
-.arow{display:flex;gap:6px;align-items:center;margin-bottom:6px}
-.arow .fld{margin:0}
-.arow .em-in{width:52px;text-align:center;padding:10px 4px;flex:none}
-.arow input[type=color]{width:40px;height:42px;border:0;background:none;padding:0;flex:none}
-.arow .del{width:40px;height:42px;border-radius:10px;background:var(--bg);color:var(--red);flex:none;font-size:18px}
-pre.code{background:var(--bg);border-radius:12px;padding:12px;font-size:11.5px;line-height:1.45;max-height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 8px;color:#b9c3d9}
-.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 90px);transform:translateX(-50%) translateY(20px);background:#26314d;color:var(--text);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:.2s;z-index:40;pointer-events:none;max-width:90vw;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%)}
-.toast.err{background:#4a2330}
-.modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.6)}
-.modal.show{display:flex}
-.modal-in{background:var(--surface);border-radius:18px;padding:20px;max-width:360px;width:100%}
-.modal-in p{margin:0 0 4px;font-weight:600;line-height:1.45}
-.day-h{display:flex;align-items:baseline;gap:8px}
-.day-h small{font-weight:600;color:var(--faint);text-transform:none;letter-spacing:0}
-@media (min-width:560px){.areas{grid-template-columns:repeat(3,1fr)}}
-.subareas{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
-.subarea{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--r);padding:12px 14px;text-align:left;border-left:3px solid var(--c)}
-.subarea .nm{font-weight:700;flex:1;min-width:0}
-.subarea .cnt{font-size:13px;color:var(--muted);white-space:nowrap}
-.subarea .cnt .r{color:var(--red);font-weight:700}
-.subarea .go{color:var(--faint);font-size:18px}
-.subarea.add{border-left-color:var(--line);color:var(--muted);justify-content:center;font-weight:600;font-size:14px}
-.chip.btnchip{cursor:pointer;color:var(--accent);background:rgba(108,140,255,.14)}
+.chip.green{color:var(--green);background:rgba(76,195,138,.12)}
+.chip.btnchip{cursor:pointer;color:var(--accent);background:rgba(108,140,255,.14);padding:6px 10px}
+.chip.pend{color:var(--amber);background:rgba(245,184,76,.12)}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+.pcard{background:var(--surface);border-radius:16px;padding:14px;border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.pcard.main{border-color:rgba(108,140,255,.55)}
+.pcard .top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pcard .top:empty{display:none}
+.slot{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.pcard .ttl{font-size:17px;font-weight:700;line-height:1.35;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.pcard.main .ttl{font-size:19px}
+.pline{font-size:14px;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+.pline .k{color:var(--muted);font-weight:600}
+.pline.muted{color:var(--muted)}
+.linkbtn{color:var(--accent);font-size:13px;font-weight:600;padding:6px 0;text-align:left;min-height:32px}
+.prog{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600}
+.prog .bar{flex:1;height:5px;border-radius:5px;background:var(--surface2);overflow:hidden;max-width:140px}
+.prog .bar i{display:block;height:100%;background:var(--green)}
+.acts{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px}
+.act{min-height:50px;border-radius:12px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:700;color:var(--muted);padding:4px 2px}
+.act b{font-size:17px;line-height:1;color:var(--text)}
+.act.go b{color:var(--accent)} .act.ok b{color:var(--green)} .act.wt b{color:var(--amber)}
+.act:active{background:var(--line)}
+.slot-empty{border:1.5px dashed var(--line);border-radius:16px;padding:18px 14px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5;width:100%}
+.slot-empty b{display:block;color:var(--text);font-size:15px;margin-bottom:4px}
+.addslot{width:100%;min-height:50px;border-radius:14px;border:1.5px dashed var(--line);color:var(--accent);font-weight:700;font-size:14px}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{background:var(--surface);border-radius:12px;padding:8px 12px;font-size:13px;color:var(--muted);font-weight:600;min-height:44px;display:flex;align-items:center;gap:6px}
+.stat b{color:var(--text);font-size:15px}
+.stat.red b{color:var(--red)}
+.task{display:flex;gap:8px;align-items:flex-start;background:var(--surface);border-radius:var(--r);padding:10px 8px;border-left:3px solid transparent;min-height:52px}
+.task.p1{border-left-color:var(--red)}
+.task.done{opacity:.55} .task.done .ttl{text-decoration:line-through;color:var(--muted)}
+.chk{width:40px;height:40px;flex:none;display:grid;place-items:center;margin:-4px 0}
+.chk i{width:24px;height:24px;border-radius:50%;border:2px solid var(--faint);display:grid;place-items:center}
+.task.p1 .chk i{border-color:var(--red)}
+.task.done .chk i,.subrow.done .chk i{background:var(--green);border-color:var(--green)}
+.task.done .chk i::after,.subrow.done .chk i::after{content:"";width:6px;height:11px;border:solid #0e1422;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.tbody{flex:1;min-width:0;cursor:pointer;padding-top:2px}
+.task .ttl{font-weight:600;line-height:1.35;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.task .note{font-size:13px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .task.child{position:relative}
 .task.child::before{content:"";position:absolute;left:-12px;top:0;bottom:50%;width:10px;border-left:2px solid var(--line);border-bottom:2px solid var(--line);border-bottom-left-radius:8px}
-.subrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-.subrow .chk{width:20px;height:20px}
+.rowmenu{width:40px;height:40px;flex:none;border-radius:10px;color:var(--muted);font-size:20px;margin:-4px 0 0}
+.rowmenu:active{background:var(--surface2)}
+.search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;outline:none;margin-bottom:10px;min-height:48px}
+.search:focus{border-color:var(--accent)}
+.filters{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px}
+@media (min-width:640px){.filters{grid-template-columns:repeat(4,1fr)}}
+.filters select{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;outline:none;min-height:44px;min-width:0}
+select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px!important}
+.counter{font-size:13px;color:var(--muted);font-weight:600;margin:6px 0 10px}
+.more{width:100%;min-height:46px;border-radius:12px;background:var(--surface);color:var(--accent);font-weight:700;margin-top:8px}
+.areas{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:600px){.areas{grid-template-columns:repeat(3,1fr)}}
+.area{background:var(--surface);border-radius:var(--r);padding:14px;text-align:left;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;min-height:104px}
+.area::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c)}
+.area .em{font-size:22px}
+.area .nm{font-weight:700;font-size:16px;line-height:1.2;overflow-wrap:anywhere}
+.area .cnt{font-size:12px;color:var(--muted);margin-top:auto;line-height:1.4}
+.area .cnt .r,.subarea .cnt .r{color:var(--red);font-weight:700}
+.subareas{display:flex;flex-direction:column;gap:6px}
+.subarea{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--r);padding:12px 14px;text-align:left;border-left:3px solid var(--c);min-height:52px}
+.subarea .nm{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.subarea .cnt{font-size:12px;color:var(--muted);white-space:nowrap}
+.subarea.add{border-left-color:var(--line);color:var(--accent);justify-content:center;font-weight:700;font-size:14px}
+.wnav{display:flex;gap:8px;margin-bottom:6px}
+.wnav button{min-height:44px;padding:0 16px;border-radius:12px;background:var(--surface);font-weight:700;color:var(--muted)}
+.wnav .cur{flex:1;color:var(--text)}
+.day{background:var(--surface);border-radius:16px;padding:10px 12px;margin-bottom:8px}
+.day.today{border:1px solid rgba(108,140,255,.5)}
+.day.past{opacity:.75}
+.day h4{margin:2px 0 6px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:8px}
+.day h4 small{color:var(--muted);font-weight:600}
+.day h4 .tag{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.wrow{display:flex;align-items:center;gap:8px;min-height:48px;border-top:1px solid var(--line);padding:4px 0}
+.day h4 + .wrow{border-top:0}
+.wrow .t{flex:1;min-width:0;cursor:pointer;line-height:1.35}
+.wrow .t .x{font-weight:600;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wrow .t .s{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wrow .star{color:var(--accent);flex:none;width:18px;text-align:center;font-weight:800}
+.wrow.dl .star{color:var(--amber)}
+.wrow.over .t .s,.wrow.over .star{color:var(--red)}
+.wempty{font-size:13px;color:var(--faint);padding:6px 0}
+.nav{position:fixed;left:0;right:0;bottom:0;background:rgba(14,20,34,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:4px 6px calc(var(--sb) + 4px);z-index:10}
+.nav-in{max-width:760px;margin:0 auto;display:flex}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--faint);padding:8px 0;position:relative;min-height:56px}
+.nav button svg{width:22px;height:22px}
+.nav button.on{color:var(--accent)}
+.nav .badge{position:absolute;top:4px;left:calc(50% + 6px);background:var(--red);color:#fff;font-size:10px;border-radius:10px;padding:0 5px;line-height:16px;min-width:16px}
+.nav .badge.amber{background:#b9862f}
+.fab{position:fixed;right:max(16px,calc(50% - 364px));bottom:calc(var(--sb) + 80px);width:56px;height:56px;border-radius:18px;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 8px 24px rgba(108,140,255,.4);z-index:11}
+.fab svg{width:26px;height:26px}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;opacity:0;pointer-events:none;transition:opacity .2s}
+.backdrop.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;transform:translateY(100%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;justify-content:center;pointer-events:none}
+.sheet.show{transform:none;pointer-events:auto}
+.sheet-in{background:var(--surface);width:100%;max-width:760px;border-radius:22px 22px 0 0;padding:10px 18px calc(var(--sb) + 18px);overflow-y:auto;max-height:92dvh}
+.grab{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 14px}
+.sheet h2{margin:0 0 12px;font-size:20px;font-weight:800;overflow-wrap:anywhere}
+.sheet h3{margin:20px 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.fld{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;outline:none;min-height:46px;margin-bottom:10px}
+.fld:focus{border-color:var(--accent)}
+textarea.fld{min-height:70px;resize:vertical;line-height:1.45}
+.fld.big{font-size:18px;font-weight:600;min-height:60px}
+.lbl{font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.lbl small{text-transform:none;letter-spacing:0;font-weight:500;color:var(--faint)}
+.picks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.pick{min-height:42px;padding:8px 12px;border-radius:20px;background:var(--bg);border:1px solid var(--line);font-size:14px;font-weight:600;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.pick.on{background:rgba(108,140,255,.16);border-color:var(--accent);color:var(--text)}
+.pick input[type=date]{background:none;border:0;outline:none;color:inherit;font-size:14px;width:135px;padding:0}
+.pick input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.7)}
+.row{display:flex;gap:8px;margin-top:18px}
+.btn{flex:1;min-height:50px;padding:12px;border-radius:14px;font-weight:700;background:var(--surface2);text-align:center}
+.btn.pri{background:var(--accent);color:#fff}
+.btn.danger{color:var(--red);flex:0 0 auto;padding:12px 18px}
+.box{background:var(--bg);border-radius:14px;padding:12px;margin:8px 0}
+.box .fld{background:var(--surface)}
+.menu{display:flex;flex-direction:column;gap:4px}
+.mi{display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 12px;border-radius:12px;text-align:left;font-weight:600;font-size:15px;width:100%}
+.mi:active,.mi:hover{background:var(--surface2)}
+.mi .ic{width:26px;text-align:center;font-size:18px;flex:none}
+.mi small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.mi.on{color:var(--accent)}
+.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}
+.subrow{display:flex;align-items:center;gap:6px;padding:2px 0;border-bottom:1px solid var(--line);min-height:50px}
+.subrow .t{flex:1;cursor:pointer;overflow-wrap:anywhere;line-height:1.35;padding:6px 0}
 .subrow.done .t{text-decoration:line-through;color:var(--muted)}
-.subrow .t{flex:1;cursor:pointer}
 .subrow .n{font-size:12px;color:var(--muted)}
-.subrow.done .chk{background:var(--green);border-color:var(--green)}
-select.fld{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:34px}
-.parent-link{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--accent);margin:-4px 0 12px;cursor:pointer}
+.parent-link{font-size:13px;color:var(--accent);margin:-4px 0 12px;cursor:pointer;display:block;padding:6px 0}
+.quick{display:flex;gap:8px;margin:8px 0}
+.quick input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;outline:none;min-height:46px}
+.quick button{background:var(--accent);color:#fff;border-radius:12px;padding:0 16px;font-weight:700;min-width:48px}
+.prow{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 10px;border-radius:12px;cursor:pointer}
+.prow:active,.prow:hover{background:var(--surface2)}
+.prow .t{flex:1;min-width:0}
+.prow .x{font-weight:600;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prow .s{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow .in{font-size:12px;color:var(--accent);font-weight:700;flex:none}
+.arow{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.arow .fld{margin:0}
+.arow .em-in{width:56px;text-align:center;flex:none}
+.arow input[type=color]{width:44px;height:44px;border:0;background:none;padding:0;flex:none}
+.arow .del{width:44px;height:44px;border-radius:10px;background:var(--bg);flex:none;font-size:18px}
+.status-box{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600}
+.toast{position:fixed;left:50%;top:calc(var(--st) + 12px);transform:translateX(-50%) translateY(-20px);background:#26314d;color:var(--text);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;opacity:0;transition:.2s;z-index:40;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast.err{background:#5a2633}
+.modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)}
+.modal.show{display:flex}
+.modal-in{background:var(--surface);border-radius:18px;padding:20px;max-width:400px;width:100%}
+.modal-in p{margin:0 0 6px;font-weight:600;line-height:1.45}
+.modal-in .menu{margin-top:12px}
 </style>
 </head>
 <body>
 <div class="app" id="app"></div>
-
+<button class="fab" data-act="new" aria-label="Новая задача"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
 <nav class="nav"><div class="nav-in" id="nav"></div></nav>
-
 <div class="backdrop" id="backdrop"></div>
 <div class="sheet" id="sheet"><div class="sheet-in" id="sheet-in"></div></div>
 <div class="modal" id="modal"><div class="modal-in" id="modal-in"></div></div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <input type="file" id="file-in" accept="application/json" hidden>
 
 <script>
 'use strict';
-// ================= utils =================
+// ================= утилиты =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const LS = {
@@ -183,834 +232,1000 @@ const LS = {
   del(k){ try{ localStorage.removeItem(k); }catch{} }
 };
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c==='x'?r:(r&3|8)).toString(16); }));
-const pad = n => String(n).padStart(2, '0');
-const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-const today = () => iso(new Date());
-const addDays = (s, n) => { const [y,m,d] = s.split('-').map(Number); return iso(new Date(y, m-1, d+n)); };
-const diffDays = (a, b) => { const p = s => { const [y,m,d] = s.split('-').map(Number); return Date.UTC(y,m-1,d); }; return Math.round((p(a)-p(b))/864e5); };
+const plural = (n, a, b, c) => { const m10 = n%10, m100 = n%100; return m10===1&&m100!==11 ? a : (m10>=2&&m10<=4&&(m100<10||m100>=20) ? b : c); };
+// Даты — всегда по Москве, формат ГГГГ-ММ-ДД
+const TZ = 'Europe/Moscow';
+const fmtISO = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+const today = () => fmtISO.format(new Date());
+const isoOf = ts => ts ? fmtISO.format(new Date(ts)) : null;
+const toUTC = s => { const [y,m,d] = s.split('-').map(Number); return Date.UTC(y, m-1, d); };
+const fromUTC = ms => new Date(ms).toISOString().slice(0, 10);
+const addDays = (s, n) => fromUTC(toUTC(s) + n * 864e5);
+const diffDays = (a, b) => Math.round((toUTC(a) - toUTC(b)) / 864e5);
+const wday = s => new Date(toUTC(s)).getUTCDay();
+const weekStart = s => addDays(s, -((wday(s) + 6) % 7));
 const MON = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
 const WD = ['вс','пн','вт','ср','чт','пт','сб'];
 const WDF = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-const dObj = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
-function fmtDue(s){
+const dm = s => { const d = new Date(toUTC(s)); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]}`; };
+function fmtDay(s){
   const n = diffDays(s, today());
-  if (n === 0) return 'Сегодня';
-  if (n === 1) return 'Завтра';
-  if (n === -1) return 'Вчера';
-  const d = dObj(s);
-  const base = `${d.getDate()} ${MON[d.getMonth()]}`;
-  return (n > 1 && n < 7) ? `${WD[d.getDay()]}, ${base}` : base;
+  if (n === 0) return 'сегодня';
+  if (n === 1) return 'завтра';
+  if (n === -1) return 'вчера';
+  return (n > 1 && n < 7 ? WD[wday(s)] + ', ' : '') + dm(s);
 }
-function plural(n, a, b, c){ const m10 = n%10, m100 = n%100; return m10===1&&m100!==11 ? a : (m10>=2&&m10<=4&&(m100<10||m100>=20) ? b : c); }
+const STATUS = { todo:'Не начата', doing:'В работе', waiting:'Ждёт', done:'Готово' };
+const STATUS_CHIP = { todo:'', doing:'violet', waiting:'amber', done:'green' };
+const PRIO = { 1:'Высокий', 2:'Обычный', 3:'Отложенный' };
+const DEFAULT_AREAS = [['Store 457','🏪','#6c8cff'], ['Kynne&Tech','📱','#a78bfa'], ['EV77','🚗','#4cc38a'], ['DioNis','🎵','#f5b84c'], ['Личное','🏠','#ff8a8a']];
+const TEXT_FIELDS = ['next_step', 'done_criteria', 'wait_for', 'unblock_action'];
 
-const STATUS = { todo:'Сделать', doing:'В работе', waiting:'Ждёт', done:'Готово' };
-const PRIO = { 1:'🔥 Высокий', 2:'Обычный', 3:'Низкий' };
-const DEFAULT_AREAS = [
-  ['Store 457','🏪','#6c8cff'], ['Kynne&Tech','📱','#a78bfa'], ['EV77','🚗','#4cc38a'],
-  ['DioNis','🎵','#f5b84c'], ['Личное','🏠','#ff8a8a']
-];
-
-// ================= backends =================
-let cfg = LS.get('tc_cfg', null);   // {url, anon, key}
+// ================= состояние =================
+let cfg = LS.get('tc_cfg', null);
 const CLOUD = { url: 'https://sjxhgnssuqimehpyiflm.supabase.co', anon: 'sb_publishable_CX0K45yuIk6o0UkuLYYgBg_jMqtuA-k' };
-// вход по ссылке: …/tasks/#key=XXXX (ключ сразу убирается из адреса)
 (() => {
   const m = location.hash.match(/key=([0-9a-f]{32})/i);
   if (m){ cfg = { ...CLOUD, key: m[1].toLowerCase() }; LS.set('tc_cfg', cfg); history.replaceState(null, '', location.pathname); }
 })();
+const VIEWS = ['today', 'week', 'waiting', 'list', 'areas', 'area'];
+const S = {
+  view: 'today', areaId: null, areas: [], tasks: [], loaded: false,
+  loading: false, syncErr: null, netDown: false,
+  open: { rest: false, overdue: false, donetoday: false, noplan: false },
+  expanded: new Set(LS.get('tc_exp', [])),
+  weekOff: 0,
+  f: { q: '', area: '', status: 'open', prio: '', due: '' }, listLimit: 60,
+  pick: { q: '', area: '', subs: false }
+};
+let outbox = LS.get('tc_outbox', []);
 
+const areaOf = id => S.areas.find(a => a.id === id);
+const taskOf = id => S.tasks.find(t => t.id === id);
+const kidsOf = id => S.areas.filter(a => (a.parent_id || null) === (id || null)).sort((a, b) => (a.sort||0) - (b.sort||0) || a.name.localeCompare(b.name));
+function areaTree(id){ const out = [id]; for (const c of kidsOf(id)) out.push(...areaTree(c.id)); return out; }
+function areaChain(id){ const p = []; let a = areaOf(id), g = 0; while (a && g++ < 20){ p.unshift(a); a = areaOf(a.parent_id); } return p; }
+const areaPath = id => areaChain(id).map(a => a.name).join(' / ');
+function flatAreas(parent = null, depth = 0){ return kidsOf(parent).flatMap(a => [{ a, depth }, ...flatAreas(a.id, depth + 1)]); }
+const subsOf = id => S.tasks.filter(t => t.parent_id === id);
+function descOf(id){ const out = []; for (const c of subsOf(id)) out.push(c, ...descOf(c.id)); return out; }
+const isTop = t => !t.parent_id || !taskOf(t.parent_id);
+const isOpen = t => t.status !== 'done';
+const isOverdue = t => isOpen(t) && t.due && t.due < today();
+const openDesc = id => descOf(id).filter(isOpen).length;
+const pendingIds = () => new Set(outbox.map(o => o.op.id || (o.op.task && o.op.task.id)).filter(Boolean));
+const byWork = (a, b) => (a.status === 'done') - (b.status === 'done') || (b.status === 'doing') - (a.status === 'doing') ||
+  (a.priority||2) - (b.priority||2) || ((a.due||'9999') < (b.due||'9999') ? -1 : (a.due||'9999') > (b.due||'9999') ? 1 : 0) ||
+  String(a.created_at||'').localeCompare(String(b.created_at||''));
+const sortTasks = arr => arr.slice().sort(byWork);
+
+// ================= операции: одна логика для экрана, локального режима и сервера =================
+// addTask{task} | updateTask{id,patch,subtasks?} | deleteTask{id} | planDay{date,main,next} | addArea{area} | updateArea{id,patch} | deleteArea{id}
+function applyOp(st, op){
+  const T = st.tasks, A = st.areas, now = new Date().toISOString();
+  const find = id => T.find(t => t.id === id);
+  const desc = id => { const out = []; const walk = p => T.forEach(t => { if (t.parent_id === p){ out.push(t); walk(t.id); } }); walk(id); return out; };
+  switch (op.type){
+    case 'addTask': {
+      if (find(op.task.id)) return;
+      const par = op.task.parent_id ? find(op.task.parent_id) : null;
+      T.push({ notes: '', status: 'todo', priority: 2, due: null, plan_date: null, plan_order: null, next_step: null, done_criteria: null,
+        wait_for: null, unblock_action: null, check_date: null, created_at: now, updated_at: now, done_at: null, ...op.task,
+        area_id: op.task.area_id || (par ? par.area_id : null), parent_id: op.task.parent_id || null });
+      const t = find(op.task.id); if (t.status === 'done') t.done_at = now;
+      TEXT_FIELDS.forEach(k => { if (!t[k]) t[k] = null; });
+      return;
+    }
+    case 'updateTask': {
+      const t = find(op.id); if (!t) return;
+      const p = op.patch;
+      if (p.status === 'done' && t.status !== 'done' && op.subtasks === 'close') desc(t.id).forEach(d => { if (d.status !== 'done'){ d.status = 'done'; d.done_at = now; } });
+      if ('plan_date' in p && !('plan_order' in p) && p.plan_date !== t.plan_date) t.plan_order = null;
+      Object.assign(t, p, { updated_at: now });
+      TEXT_FIELDS.forEach(k => { if (k in p && !p[k]) t[k] = null; });
+      t.done_at = t.status === 'done' ? (t.done_at || now) : null;
+      return;
+    }
+    case 'deleteTask': { const kill = new Set([op.id, ...desc(op.id).map(x => x.id)]); st.tasks = T.filter(t => !kill.has(t.id)); return; }
+    case 'planDay': {
+      const ids = [op.main, ...(op.next || [])].filter(Boolean);
+      T.forEach(t => { if (t.plan_date === op.date && t.plan_order != null && !ids.includes(t.id)) t.plan_order = null; });
+      if (op.main){ const m = find(op.main); if (m){ m.plan_date = op.date; m.plan_order = 0; } }
+      (op.next || []).forEach((id, i) => { if (id === op.main) return; const x = find(id); if (x){ x.plan_date = op.date; x.plan_order = i + 1; } });
+      return;
+    }
+    case 'addArea': {
+      if (A.find(a => a.id === op.area.id)) return;
+      const par = op.area.parent_id ? A.find(a => a.id === op.area.parent_id) : null;
+      A.push({ emoji: '📁', sort: 999, ...op.area, color: op.area.color || (par ? par.color : '#6c8cff'), parent_id: op.area.parent_id || null });
+      return;
+    }
+    case 'updateArea': { const a = A.find(x => x.id === op.id); if (a) Object.assign(a, op.patch); return; }
+    case 'deleteArea': {
+      const a = A.find(x => x.id === op.id); const par = a ? (a.parent_id || null) : null;
+      A.forEach(x => { if (x.parent_id === op.id) x.parent_id = par; }); T.forEach(t => { if (t.area_id === op.id) t.area_id = par; });
+      st.areas = A.filter(x => x.id !== op.id); return;
+    }
+  }
+}
+
+// ---------- локальный режим (без облака) ----------
 const Local = {
   load(){
     let db = LS.get('tc_local', null);
-    if (!db){
-      db = { areas: DEFAULT_AREAS.map(([name,emoji,color], i) => ({ id: uid(), name, emoji, color, sort: i+1 })), tasks: [] };
-      LS.set('tc_local', db);
-    }
+    if (!db){ db = { areas: DEFAULT_AREAS.map(([name, emoji, color], i) => ({ id: uid(), name, emoji, color, sort: i + 1, parent_id: null })), tasks: [] }; LS.set('tc_local', db); }
     return db;
   },
-  save(db){ LS.set('tc_local', db); },
-  async list(){ const db = this.load(); const cut = Date.now() - 30*864e5;
-    return { areas: db.areas, tasks: db.tasks.filter(t => t.status !== 'done' || !t.done_at || Date.parse(t.done_at) > cut), today: today() }; },
-  async addTask(t){ const db = this.load(); const now = new Date().toISOString();
-    const par = t.parent_id ? db.tasks.find(x => x.id === t.parent_id) : null;
-    const n = { id: uid(), title: t.title, notes: t.notes||'', area_id: t.area_id || (par ? par.area_id : null), parent_id: t.parent_id||null, status: t.status||'todo', priority: t.priority||2, due: t.due||null, created_at: now, updated_at: now, done_at: t.status==='done' ? now : null };
-    db.tasks.push(n); this.save(db); return n; },
-  async updateTask(id, p){ const db = this.load(); const t = db.tasks.find(x => x.id === id); if (!t) throw new Error('Задача не найдена');
-    Object.assign(t, p, { updated_at: new Date().toISOString() });
-    t.done_at = t.status === 'done' ? (t.done_at || new Date().toISOString()) : null;
-    this.save(db); return t; },
-  async deleteTask(id){ const db = this.load(); const kill = new Set([id]); let grow = true;
-    while (grow){ grow = false; for (const t of db.tasks) if (t.parent_id && kill.has(t.parent_id) && !kill.has(t.id)){ kill.add(t.id); grow = true; } }
-    db.tasks = db.tasks.filter(x => !kill.has(x.id)); this.save(db); },
-  async addArea(a){ const db = this.load(); const par = a.parent_id ? db.areas.find(x => x.id === a.parent_id) : null;
-    const n = { id: uid(), name: a.name, emoji: a.emoji||'📁', color: a.color || (par ? par.color : '#6c8cff'), parent_id: a.parent_id||null, sort: Math.max(0, ...db.areas.filter(x => (x.parent_id||null) === (a.parent_id||null)).map(x=>x.sort||0)) + 1 };
-    db.areas.push(n); this.save(db); return n; },
-  async updateArea(id, p){ const db = this.load(); const a = db.areas.find(x => x.id === id); if (a) Object.assign(a, p); this.save(db); return a; },
-  async deleteArea(id){ const db = this.load(); const a = db.areas.find(x => x.id === id); const par = a ? (a.parent_id||null) : null;
-    db.areas.forEach(x => { if (x.parent_id === id) x.parent_id = par; }); db.tasks.forEach(t => { if (t.area_id === id) t.area_id = par; });
-    db.areas = db.areas.filter(x => x.id !== id); this.save(db); }
+  async list(){ return { ...this.load(), today: today() }; },
+  async send(op){ const db = this.load(); applyOp(db, JSON.parse(JSON.stringify(op))); LS.set('tc_local', db); }
 };
 
+// ---------- облако ----------
+class NetError extends Error {}
 async function rpc(fn, args, c = cfg){
-  const headers = { 'apikey': c.anon, 'Content-Type': 'application/json' };
-  if (c.anon.startsWith('eyJ')) headers.Authorization = 'Bearer ' + c.anon;  // старый формат anon-ключа
-  const r = await fetch(c.url.replace(/\/+$/, '') + '/rest/v1/rpc/' + fn, { method: 'POST', headers, body: JSON.stringify({ p_key: c.key, ...args }) });
+  const headers = { apikey: c.anon, 'Content-Type': 'application/json' };
+  if (c.anon.startsWith('eyJ')) headers.Authorization = 'Bearer ' + c.anon;
+  let r;
+  try { r = await fetch(c.url.replace(/\/+$/, '') + '/rest/v1/rpc/' + fn, { method: 'POST', headers, body: JSON.stringify({ p_key: c.key, ...args }) }); }
+  catch (e){ throw new NetError('Нет связи с сервером'); }
   const j = await r.json().catch(() => null);
+  if (r.status >= 500 || r.status === 429) throw new NetError((j && j.message) || ('Сервер недоступен (' + r.status + ')'));
   if (!r.ok) throw new Error((j && (j.message || j.hint)) || ('Ошибка ' + r.status));
   return j;
 }
+function taskParams(p){
+  const a = {};
+  if ('title' in p) a.p_title = p.title;
+  if ('notes' in p) a.p_notes = p.notes || '';
+  if ('priority' in p) a.p_priority = p.priority;
+  if ('status' in p) a.p_status = p.status;
+  if ('due' in p){ if (p.due) a.p_due = p.due; else a.p_clear_due = true; }
+  if ('area_id' in p){ if (p.area_id) a.p_area = p.area_id; else a.p_clear_area = true; }
+  if ('parent_id' in p){ if (p.parent_id) a.p_parent = p.parent_id; else a.p_clear_parent = true; }
+  if ('plan_date' in p){ if (p.plan_date) a.p_plan_date = p.plan_date; else a.p_clear_plan_date = true; }
+  if ('plan_order' in p){ if (p.plan_order != null) a.p_plan_order = p.plan_order; else a.p_clear_plan_order = true; }
+  if ('check_date' in p){ if (p.check_date) a.p_check_date = p.check_date; else a.p_clear_check_date = true; }
+  TEXT_FIELDS.forEach(k => { if (k in p) a['p_' + k] = p[k] || ''; });
+  return a;
+}
 const Cloud = {
-  async list(){ return rpc('tm_list', { p_done_days: 30 }); },
-  async addTask(t){ return rpc('tm_add_task', { p_title: t.title, p_notes: t.notes||'', p_area: t.area_id||null, p_priority: t.priority||2, p_due: t.due||null, p_status: t.status||'todo', p_parent: t.parent_id||null }); },
-  async updateTask(id, p){
-    const a = { p_id: id };
-    if ('title' in p) a.p_title = p.title;
-    if ('notes' in p) a.p_notes = p.notes;
-    if ('priority' in p) a.p_priority = p.priority;
-    if ('status' in p) a.p_status = p.status;
-    if ('due' in p){ if (p.due) a.p_due = p.due; else a.p_clear_due = true; }
-    if ('area_id' in p){ if (p.area_id) a.p_area = p.area_id; else a.p_clear_area = true; }
-    if ('parent_id' in p){ if (p.parent_id) a.p_parent = p.parent_id; else a.p_clear_parent = true; }
-    return rpc('tm_update_task', a);
-  },
-  async deleteTask(id){ return rpc('tm_delete_task', { p_id: id }); },
-  async addArea(a){ return rpc('tm_add_area', { p_name: a.name, p_emoji: a.emoji||'📁', p_color: a.color||null, p_parent: a.parent_id||null }); },
-  async updateArea(id, p){
-    const a = { p_id: id, p_name: p.name ?? null, p_emoji: p.emoji ?? null, p_color: p.color ?? null, p_sort: p.sort ?? null };
-    if ('parent_id' in p){ if (p.parent_id) a.p_parent = p.parent_id; else a.p_clear_parent = true; }
-    return rpc('tm_update_area', a);
-  },
-  async deleteArea(id){ return rpc('tm_delete_area', { p_id: id }); }
+  async list(){ return rpc('tm_list', { p_done_days: 3650 }); },
+  async send(op){
+    switch (op.type){
+      case 'addTask': { const t = op.task; return rpc('tm_add_task', { p_id: t.id, p_title: t.title, p_notes: t.notes || '', p_area: t.area_id || null, p_priority: t.priority || 2,
+        p_due: t.due || null, p_status: t.status || 'todo', p_parent: t.parent_id || null, p_plan_date: t.plan_date || null, p_plan_order: t.plan_order ?? null,
+        p_next_step: t.next_step || null, p_done_criteria: t.done_criteria || null, p_wait_for: t.wait_for || null, p_unblock_action: t.unblock_action || null, p_check_date: t.check_date || null }); }
+      case 'updateTask': return rpc('tm_update_task', { p_id: op.id, ...taskParams(op.patch), ...(op.subtasks ? { p_subtasks: op.subtasks } : {}) });
+      case 'deleteTask': return rpc('tm_delete_task', { p_id: op.id });
+      case 'planDay': return rpc('tm_plan_day', { p_date: op.date, p_main: op.main || null, p_next: op.next || [] });
+      case 'addArea': { const a = op.area; return rpc('tm_add_area', { p_id: a.id, p_name: a.name, p_emoji: a.emoji || '📁', p_color: a.color || null, p_parent: a.parent_id || null }); }
+      case 'updateArea': { const p = op.patch, a = { p_id: op.id, p_name: p.name ?? null, p_emoji: p.emoji ?? null, p_color: p.color ?? null };
+        if ('parent_id' in p){ if (p.parent_id) a.p_parent = p.parent_id; else a.p_clear_parent = true; } return rpc('tm_update_area', a); }
+      case 'deleteArea': return rpc('tm_delete_area', { p_id: op.id });
+    }
+  }
 };
 const api = () => (cfg ? Cloud : Local);
 
-// ================= state =================
-const S = {
-  view: LS.get('tc_view', 'today'),
-  areaId: null,
-  areas: [], tasks: [],
-  loading: false, syncErr: null,
-  showDone: {},
-  expanded: new Set(LS.get('tc_exp', [])),
-  q: ''
-};
-if (String(S.view).startsWith('area:')){ S.areaId = S.view.slice(5); S.view = 'area'; }
-
-function cacheSave(){ if (cfg) LS.set('tc_cache', { areas: S.areas, tasks: S.tasks }); }
-function areaOf(id){ return S.areas.find(a => a.id === id); }
-const kidsOf = id => S.areas.filter(a => (a.parent_id||null) === (id||null)).sort((a,b) => (a.sort||0)-(b.sort||0) || a.name.localeCompare(b.name));
-function areaTree(id){ const out = [id]; for (const c of kidsOf(id)) out.push(...areaTree(c.id)); return out; }
-function areaChain(id){ const p = []; let a = areaOf(id), g = 0; while (a && g++ < 20){ p.unshift(a); a = areaOf(a.parent_id); } return p; }
-const areaPathName = id => areaChain(id).map(a => a.name).join(' / ');
-function flatAreas(parent = null, depth = 0){ return kidsOf(parent).flatMap(a => [{ a, depth }, ...flatAreas(a.id, depth + 1)]); }
-const taskOf = id => S.tasks.find(t => t.id === id);
-const subsOf = id => S.tasks.filter(t => t.parent_id === id);
-function taskDesc(id){ const out = []; for (const c of subsOf(id)) out.push(c, ...taskDesc(c.id)); return out; }
-const isTop = t => !t.parent_id || !taskOf(t.parent_id);
+// ---------- очередь отправки: сразу на экране, на сервер по порядку, повтор без дублей ----------
+let flushing = false, retryTimer = null;
+function saveOutbox(){ LS.set('tc_outbox', outbox); }
+async function commit(op, confirmMsg){
+  applyOp(S, op);
+  if (!cfg){ await Local.send(op); render(); if (confirmMsg) toast(confirmMsg); return; }
+  outbox.push({ opId: uid(), op, confirm: confirmMsg || null });
+  saveOutbox(); render(); flush();
+}
+async function flush(){
+  if (flushing || !cfg) return;
+  flushing = true;
+  let hadError = false;
+  try {
+    while (outbox.length){
+      const item = outbox[0];
+      try { await Cloud.send(item.op); }
+      catch (e){
+        if (e instanceof NetError){
+          if (!S.netDown) toast('Нет связи — изменения сохранены на устройстве и отправятся позже', true);
+          S.netDown = true; render();
+          clearTimeout(retryTimer); retryTimer = setTimeout(flush, 20000);
+          return;
+        }
+        outbox.shift(); saveOutbox();
+        toast('Не сохранено: ' + e.message, true); hadError = true;
+        continue;
+      }
+      outbox.shift(); saveOutbox();
+      if (S.netDown){ S.netDown = false; toast('Связь восстановлена — изменения отправлены'); }
+      else if (item.confirm) toast(item.confirm);
+      render();
+    }
+  } finally { flushing = false; }
+  if (hadError) reload(true);
+}
+window.addEventListener('online', () => flush());
 
 async function reload(silent){
   S.loading = true; if (!silent) render();
-  try{
+  try {
     const d = await api().list();
-    S.areas = (d.areas || []).slice().sort((a,b) => (a.sort||0)-(b.sort||0));
-    S.tasks = d.tasks || [];
-    S.syncErr = null; cacheSave();
-  }catch(e){
+    S.areas = d.areas || []; S.tasks = d.tasks || [];
+    for (const it of outbox) applyOp(S, JSON.parse(JSON.stringify(it.op)));
+    S.syncErr = null; S.loaded = true;
+    if (cfg) LS.set('tc_cache', { areas: S.areas, tasks: S.tasks });
+  } catch (e){
     S.syncErr = e.message;
     if (!silent) toast('Не удалось обновить: ' + e.message, true);
-  }finally{ S.loading = false; render(); }
+  } finally { S.loading = false; render(); }
 }
 
-// оптимистичное изменение + запрос
-async function act(localFn, remoteFn, okMsg){
-  localFn(); render();
-  try{ const r = await remoteFn(); if (okMsg) toast(okMsg); return r; }
-  catch(e){ toast('Ошибка: ' + e.message, true); await reload(true); }
+// ---------- действия ----------
+const upd = (id, patch, msg, extra = {}) => commit({ type: 'updateTask', id, patch, ...extra }, msg);
+function planOf(date){
+  const P = S.tasks.filter(t => isOpen(t) && t.plan_date === date);
+  const main = P.find(t => t.plan_order === 0) || null;
+  const next = P.filter(t => t.plan_order === 1 || t.plan_order === 2).sort((a, b) => a.plan_order - b.plan_order);
+  const rest = sortTasks(P.filter(t => t !== main && !next.includes(t)));
+  return { all: P, main, next, rest };
+}
+function setSlot(id, date, slot){
+  const t = taskOf(id); if (!t) return false;
+  const p = planOf(date);
+  let main = p.main ? p.main.id : null, next = p.next.map(x => x.id).filter(x => x !== id);
+  if (main === id) main = null;
+  if (slot === 'main'){ if (main) next.unshift(main); main = id; }
+  else if (slot === 'next'){ if (next.length >= 2){ toast('Следующих уже две — сначала уберите одну из них', true); return false; } next.push(id); }
+  else {
+    if (t.plan_date !== date){ upd(id, { plan_date: date, plan_order: null }, 'Добавлено в план дня'); return true; }
+    if (t.plan_order == null) return true;
+  }
+  commit({ type: 'planDay', date, main, next: next.slice(0, 2) }, slot === 'main' ? 'Главная задача дня выбрана' : 'План дня обновлён');
+  return true;
+}
+async function askSubtasks(n){
+  return choose(`У задачи ${n} ${plural(n, 'открытая подзадача', 'открытые подзадачи', 'открытых подзадач')}. Что с ними сделать?`, [
+    ['close', '✓', 'Закрыть вместе с подзадачами', `отметить выполненными все ${n}`],
+    ['keep', '◻', 'Закрыть только задачу', 'подзадачи останутся открытыми'],
+  ]);
+}
+async function finishTask(id){
+  const t = taskOf(id); if (!t) return;
+  if (t.status === 'done'){ upd(id, { status: 'todo' }, 'Задача снова открыта'); return; }
+  const n = openDesc(id);
+  if (!n){ upd(id, { status: 'done' }, 'Готово ✓'); return; }
+  const ch = await askSubtasks(n);
+  if (ch) upd(id, { status: 'done' }, 'Готово ✓', { subtasks: ch });
 }
 
-// ================= task ops =================
-async function createTask(t){
-  const tmp = { id: 'tmp-' + uid(), notes:'', status:'todo', priority:2, due:null, area_id:null, created_at:new Date().toISOString(), ...t };
-  const r = await act(() => S.tasks.push(tmp), () => api().addTask(t), 'Добавлено');
-  if (r){ const i = S.tasks.indexOf(tmp); if (i >= 0) S.tasks[i] = r; cacheSave(); render(); }
-}
-async function patchTask(id, p, msg){
-  const t = S.tasks.find(x => x.id === id); if (!t || id.startsWith('tmp-')) return;
-  await act(() => { Object.assign(t, p); t.done_at = t.status === 'done' ? (t.done_at || new Date().toISOString()) : null; },
-            () => api().updateTask(id, p), msg);
-  cacheSave();
-}
-async function removeTask(id){
-  const kill = new Set([id, ...taskDesc(id).map(x => x.id)]);
-  await act(() => { S.tasks = S.tasks.filter(x => !kill.has(x.id)); }, () => api().deleteTask(id), 'Удалено');
-  cacheSave();
-}
-function toggleDone(id){
-  const t = S.tasks.find(x => x.id === id); if (!t) return;
-  if (navigator.vibrate) navigator.vibrate(10);
-  patchTask(id, { status: t.status === 'done' ? 'todo' : 'done' });
-}
-
-// ================= icons =================
+// ================= иконки и общие элементы =================
 const I = {
   today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+  wait:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 10 5 10 10S7 17 7 22M17 2c0 5-10 5-10 10s10 5 10 10"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h12M9 12h12M9 18h12"/><circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/></svg>',
   areas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
-  inbox:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z"/></svg>',
-  plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
-  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   refresh:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>',
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'
 };
+function header(title, sub, opts = {}){
+  const dot = !cfg ? '' : (S.netDown ? 'wait' : S.syncErr ? 'err' : 'on');
+  return `<div class="hdr">
+    ${opts.back ? `<button class="icon-btn" ${opts.back === 'areas' ? 'data-act="go" data-v="areas"' : `data-act="open-area" data-v="${esc(opts.back)}"`} aria-label="Назад">${I.back}</button>` : ''}
+    <div style="flex:1;min-width:0"><h1>${title}</h1><div class="sub"><span class="sync-dot ${dot}"></span>${sub}</div></div>
+    ${opts.extra || ''}
+    <button class="icon-btn ${S.loading ? 'spin' : ''}" data-act="refresh" aria-label="Обновить">${I.refresh}</button>
+    <button class="icon-btn" data-act="settings" aria-label="Настройки">${I.gear}</button>
+  </div>${banner()}`;
+}
+function banner(){
+  if (!outbox.length) return '';
+  const n = outbox.length;
+  return S.netDown
+    ? `<div class="banner" id="net-banner"><span>Нет связи. ${n} ${plural(n, 'изменение ждёт', 'изменения ждут', 'изменений ждут')} отправки — они сохранены на этом устройстве.</span><button data-act="retry">Повторить</button></div>`
+    : `<div class="banner" style="opacity:.75"><span>Сохраняю ${n} ${plural(n, 'изменение', 'изменения', 'изменений')}…</span></div>`;
+}
+const areaChip = id => { const a = areaOf(id); return a ? `<span class="chip"><span class="dot" style="background:${esc(a.color)}"></span>${esc(areaPath(id))}</span>` : `<span class="chip">📥 Входящие</span>`; };
+const dueChip = t => !t.due ? '' : `<span class="chip ${isOverdue(t) ? 'red' : (t.due === today() ? 'accent' : '')}">${isOverdue(t) ? '⏰ срок прошёл ' + dm(t.due) : 'срок ' + fmtDay(t.due)}</span>`;
+const statusChip = t => t.status === 'todo' ? '' : `<span class="chip ${STATUS_CHIP[t.status]}">${t.status === 'doing' ? '▶ ' : t.status === 'waiting' ? '⏳ ' : '✓ '}${STATUS[t.status]}</span>`;
+function progress(t){
+  const s = subsOf(t.id); if (!s.length) return '';
+  const d = s.filter(x => x.status === 'done').length;
+  return `<div class="prog"><span>${d}/${s.length} ${plural(s.length, 'подзадача', 'подзадачи', 'подзадач')}</span><span class="bar"><i style="width:${Math.round(d / s.length * 100)}%"></i></span></div>`;
+}
+function counts(tasks){
+  const top = tasks.filter(isTop).length, sub = tasks.length - top;
+  return `${top} ${plural(top, 'задача', 'задачи', 'задач')} · ${sub} ${plural(sub, 'подзадача', 'подзадачи', 'подзадач')}`;
+}
 
-// ================= rendering =================
-const open = t => t.status !== 'done';
-const isOver = t => open(t) && t.due && t.due < today();
-const sortTasks = arr => arr.slice().sort((a,b) =>
-  (a.status==='done') - (b.status==='done') ||
-  (a.priority||2) - (b.priority||2) ||
-  ((a.due||'9999') < (b.due||'9999') ? -1 : (a.due||'9999') > (b.due||'9999') ? 1 : 0) ||
-  String(a.created_at||'').localeCompare(String(b.created_at||'')));
+// ---------- карточка в плане дня ----------
+function planCard(t, slot){
+  const label = slot === 'main' ? 'Главная задача' : slot === 'next1' ? 'Дальше · 2' : slot === 'next2' ? 'Дальше · 3' : '';
+  const par = t.parent_id ? taskOf(t.parent_id) : null;
+  const pend = pendingIds().has(t.id);
+  return `<div class="pcard ${slot === 'main' ? 'main' : ''}" data-id="${esc(t.id)}">
+    <div class="top">${label ? `<span class="slot">${label}</span>` : ''}${statusChip(t)}${t.priority === 1 ? '<span class="chip red">🔥 высокий</span>' : ''}${pend ? '<span class="chip pend">⟳ не отправлено</span>' : ''}</div>
+    <div class="ttl" data-act="edit">${esc(t.title)}</div>
+    <div class="meta" style="margin-top:0">${areaChip(t.area_id)}${dueChip(t)}${par ? `<span class="chip">↳ ${esc(par.title)}</span>` : ''}</div>
+    ${progress(t)}
+    ${t.next_step ? `<div class="pline"><span class="k">Следующий шаг:</span> ${esc(t.next_step)}</div>` : `<button class="linkbtn" data-act="edit">＋ Указать следующий шаг</button>`}
+    ${t.done_criteria ? `<div class="pline muted"><span class="k">Готово, когда:</span> ${esc(t.done_criteria)}</div>` : ''}
+    ${t.status === 'waiting' && t.wait_for ? `<div class="pline muted"><span class="k">Ждём:</span> ${esc(t.wait_for)}</div>` : ''}
+    <div class="acts">
+      ${t.status === 'doing' ? `<button class="act" data-act="pause"><b>⏸</b>Пауза</button>` : `<button class="act go" data-act="start"><b>▶</b>Начать</button>`}
+      <button class="act ok" data-act="finish"><b>✓</b>Готово</button>
+      <button class="act wt" data-act="wait"><b>⏳</b>Ждать</button>
+      <button class="act" data-act="move"><b>↪</b>Перенос</button>
+      <button class="act" data-act="edit"><b>⋯</b>Детали</button>
+    </div>
+  </div>`;
+}
 
+// ---------- строка задачи в списках ----------
 function taskRow(t, opts = {}, depth = 0){
-  const a = areaOf(t.area_id);
-  const chips = [];
   const subs = subsOf(t.id);
+  const chips = [];
   if (subs.length && !opts.flat){
     const dn = subs.filter(x => x.status === 'done').length;
-    const exp = S.expanded.has(t.id);
-    chips.push(`<span class="chip btnchip" data-act="expand">${exp ? '▾' : '▸'} ${dn}/${subs.length}</span>`);
+    chips.push(`<span class="chip btnchip" data-act="expand">${S.expanded.has(t.id) ? '▾' : '▸'} ${dn}/${subs.length} ${plural(subs.length, 'подзадача', 'подзадачи', 'подзадач')}</span>`);
   } else if (subs.length) chips.push(`<span class="chip">☰ ${subs.filter(x => x.status === 'done').length}/${subs.length}</span>`);
   if (opts.flat && t.parent_id && taskOf(t.parent_id)) chips.push(`<span class="chip">↳ ${esc(taskOf(t.parent_id).title)}</span>`);
-  if (a && !opts.hideArea && depth === 0) chips.push(`<span class="chip"><span class="dot" style="background:${esc(a.color)}"></span>${esc(areaPathName(a.id))}</span>`);
-  if (!a && !opts.hideArea && depth === 0 && t.area_id == null) chips.push(`<span class="chip">📥 Входящие</span>`);
-  if (t.due && !opts.hideDue){
-    const cls = isOver(t) ? 'red' : (t.due === today() ? 'accent' : '');
-    chips.push(`<span class="chip ${cls}">${isOver(t) ? '⏰ ' : ''}${fmtDue(t.due)}</span>`);
-  }
-  if (t.status === 'doing') chips.push(`<span class="chip violet">▶ В работе</span>`);
-  if (t.status === 'waiting') chips.push(`<span class="chip amber">⏳ Ждёт</span>`);
-  if (t.priority === 1 && t.status !== 'done') chips.push(`<span class="chip red">🔥</span>`);
-  let h = `<div class="task p${t.priority||2} ${t.status==='done'?'done':''} ${depth ? 'child' : ''}" data-id="${esc(t.id)}" style="${depth ? `margin-left:${Math.min(depth, 5) * 20}px` : ''}">
-    <button class="chk" data-act="toggle" aria-label="Готово"></button>
-    <div class="tbody" data-act="edit">
-      <div class="ttl">${esc(t.title)}</div>
-      ${t.notes ? `<div class="note">${esc(t.notes)}</div>` : ''}
-      ${chips.length ? `<div class="meta">${chips.join('')}</div>` : ''}
-    </div></div>`;
+  if (!opts.hideArea && depth === 0) chips.push(areaChip(t.area_id));
+  if (t.status !== 'done') chips.push(statusChip(t));
+  chips.push(dueChip(t));
+  if (t.plan_date && isOpen(t)) chips.push(`<span class="chip accent">📌 ${t.plan_order === 0 ? 'главная · ' : ''}${fmtDay(t.plan_date)}</span>`);
+  if (t.priority === 1 && isOpen(t)) chips.push('<span class="chip red">🔥</span>');
+  if (pendingIds().has(t.id)) chips.push('<span class="chip pend">⟳</span>');
+  let h = `<div class="task p${t.priority||2} ${t.status === 'done' ? 'done' : ''} ${depth ? 'child' : ''}" data-id="${esc(t.id)}" style="${depth ? `margin-left:${Math.min(depth, 4) * 18}px` : ''}">
+    <button class="chk" data-act="finish" aria-label="Отметить выполненной"><i></i></button>
+    <div class="tbody" data-act="edit"><div class="ttl">${esc(t.title)}</div>
+      ${t.next_step && isOpen(t) ? `<div class="note">→ ${esc(t.next_step)}</div>` : ''}
+      <div class="meta">${chips.join('')}</div></div>
+    <button class="rowmenu" data-act="move" aria-label="Запланировать">⋯</button>
+  </div>`;
   if (subs.length && !opts.flat && S.expanded.has(t.id))
     h += sortTasks(subs).map(c => taskRow(c, { ...opts, hideArea: true }, depth + 1)).join('');
   return h;
 }
-function section(title, tasks, opts = {}){
-  if (!tasks.length && !opts.keep) return '';
-  return `<div class="sec ${opts.cls||''}">${title}<span class="n">${tasks.length}</span>${opts.extra||''}</div>
-    <div class="list">${tasks.map(t => taskRow(t, opts)).join('')}</div>`;
-}
-function doneSection(key, tasks, opts = {}){
-  if (!tasks.length) return '';
-  const on = S.showDone[key];
-  return `<div class="sec">Готово<span class="n">${tasks.length}</span><button class="toggle" data-act="show-done" data-k="${key}">${on ? 'скрыть' : 'показать'}</button></div>
-    ${on ? `<div class="list">${tasks.map(t => taskRow(t, opts)).join('')}</div>` : ''}`;
-}
-function header(title, sub, back, extra = ''){
-  const dot = cfg ? (S.syncErr ? 'err' : 'on') : '';
-  const backBtn = !back ? '' : back === 'areas'
-    ? `<button class="back" data-act="go" data-v="areas">${I.back}</button>`
-    : `<button class="back" data-act="open-area" data-v="${esc(back)}">${I.back}</button>`;
-  return `<div class="hdr">
-    ${backBtn}
-    <div style="flex:1;min-width:0"><h1>${title}</h1><div class="sub"><span class="sync-dot ${dot}"></span>${sub}</div></div>
-    ${extra}
-    <button class="icon-btn ${S.loading?'spin':''}" data-act="refresh" aria-label="Обновить">${I.refresh}</button>
-    <button class="icon-btn" data-act="settings" aria-label="Настройки">${I.gear}</button>
-  </div>`;
-}
-function quickAdd(ph){ return `<form class="quick" data-form="quick"><input name="q" placeholder="${ph}" autocomplete="off" enterkeyhint="done"><button type="submit">+</button></form>`; }
-function areaStats(id){
-  const ids = new Set(areaTree(id));
-  const ts = S.tasks.filter(t => ids.has(t.area_id));
-  return { all: ts.length, open: ts.filter(open).length, over: ts.filter(isOver).length };
-}
+const listOf = (tasks, opts) => `<div class="list">${tasks.map(t => taskRow(t, opts)).join('')}</div>`;
 
+// ================= экраны =================
 function viewToday(){
-  const td = today(), d = new Date();
-  const over = sortTasks(S.tasks.filter(isOver));
-  const tod  = sortTasks(S.tasks.filter(t => open(t) && t.due === td));
-  const doing = sortTasks(S.tasks.filter(t => open(t) && t.status === 'doing' && !(t.due && t.due <= td)));
-  const hot  = sortTasks(S.tasks.filter(t => open(t) && t.priority === 1 && !t.due && t.status !== 'doing'));
-  const doneToday = S.tasks.filter(t => t.status === 'done' && t.done_at && iso(new Date(t.done_at)) === td);
-  const openAll = S.tasks.filter(open).length;
-  let h = header('Сегодня', `${WDF[d.getDay()]}, ${d.getDate()} ${MON[d.getMonth()]}`);
-  h += `<div class="stats">
-    <div class="stat red"><div class="v">${over.length}</div><div class="l">просрочено</div></div>
-    <div class="stat accent"><div class="v">${tod.length}</div><div class="l">на сегодня</div></div>
-    <div class="stat green"><div class="v">${doneToday.length}</div><div class="l">сделано</div></div></div>`;
-  h += section('🔥 Горит', over, { cls: 'red', flat: true });
-  h += section('Сегодня', tod, { cls: 'accent', hideDue: true, flat: true });
-  h += section('В работе', doing, { flat: true });
-  h += section('Важное без срока', hot, { flat: true });
-  if (!over.length && !tod.length && !doing.length && !hot.length)
-    h += `<div class="empty" style="margin-top:16px"><b>☀️</b>На сегодня ничего не горит.<br>Всего открытых задач: ${openAll}</div>`;
-  h += doneSection('today', doneToday, { flat: true });
+  const td = today();
+  const p = planOf(td);
+  const overduePlan = sortTasks(S.tasks.filter(t => isOpen(t) && t.plan_date && t.plan_date < td));
+  const doneToday = S.tasks.filter(t => t.status === 'done' && isoOf(t.done_at) === td);
+  const dueOver = S.tasks.filter(isOverdue).length, dueToday = S.tasks.filter(t => isOpen(t) && t.due === td).length;
+  const waitCheck = S.tasks.filter(t => t.status === 'waiting' && t.check_date && t.check_date <= td).length;
+  let h = header('Сегодня', `${WDF[wday(td)]}, ${dm(td)}`);
+  if (!S.loaded && cfg) return h + `<div class="empty">Загружаю…</div>`;
+  if (!p.all.length){
+    h += `<div class="empty"><b>🎯</b>План на сегодня пуст.<br>Выберите одну главную задачу дня и до двух следующих из общего списка.
+      <button class="btn pri" data-act="pick" data-v="main">Выбрать главную задачу</button></div>`;
+  } else {
+    h += `<div class="sec accent">Главное</div>`;
+    h += p.main ? planCard(p.main, 'main')
+      : `<button class="slot-empty" data-act="pick" data-v="main"><b>Главная задача не выбрана</b>Нажмите, чтобы выбрать её из плана или общего списка</button>`;
+    h += `<div class="sec">Дальше<span class="n">${p.next.length} из 2</span></div><div class="list" style="gap:8px">`;
+    h += p.next.map((t, i) => planCard(t, i ? 'next2' : 'next1')).join('');
+    if (p.next.length < 2) h += `<button class="addslot" data-act="pick" data-v="next">＋ Следующая задача</button>`;
+    h += `</div>`;
+    h += `<div class="sec">Ещё на сегодня<span class="n">${p.rest.length}</span><button class="toggle" data-act="tg" data-k="rest">${S.open.rest ? 'свернуть' : 'показать'}</button></div>`;
+    if (S.open.rest) h += (p.rest.length ? listOf(p.rest, { flat: true }) : '') + `<button class="more" data-act="pick" data-v="rest">＋ Добавить в план дня</button>`;
+  }
+  if (overduePlan.length){
+    h += `<div class="sec amber">Не сделано в прошлые дни<span class="n">${overduePlan.length}</span><button class="toggle" data-act="tg" data-k="overdue">${S.open.overdue ? 'свернуть' : 'показать'}</button></div>`;
+    if (S.open.overdue) h += `<div class="hint">День работы прошёл. Перенесите задачу через ⋯ — сама она не переносится.</div>` + listOf(overduePlan, { flat: true });
+  }
+  h += `<div class="stats" style="margin-top:22px">
+    <button class="stat ${dueOver ? 'red' : ''}" data-act="go" data-v="week"><b>${dueOver}</b> срок прошёл</button>
+    <button class="stat" data-act="go" data-v="week"><b>${dueToday}</b> срок сегодня</button>
+    <button class="stat" data-act="go" data-v="waiting"><b>${waitCheck}</b> пора проверить</button></div>`;
+  if (doneToday.length){
+    h += `<div class="sec green">Сделано сегодня<span class="n">${doneToday.length}</span><button class="toggle" data-act="tg" data-k="donetoday">${S.open.donetoday ? 'свернуть' : 'показать'}</button></div>`;
+    if (S.open.donetoday) h += listOf(doneToday, { flat: true });
+  }
   return h;
 }
 
-function viewAreas(){
-  const nOpen = S.tasks.filter(open).length;
-  let h = header('Полки', `${nOpen} ${plural(nOpen,'открытая задача','открытые задачи','открытых задач')}`);
-  h += `<input class="search" id="search" placeholder="🔍 Поиск по всем задачам" value="${esc(S.q)}" autocomplete="off">`;
-  if (S.q.trim()){
-    const q = S.q.trim().toLowerCase();
-    const res = sortTasks(S.tasks.filter(t => (t.title + ' ' + (t.notes||'')).toLowerCase().includes(q)));
-    return h + (res.length ? section('Найдено', res, { flat: true }) : `<div class="empty">Ничего не найдено</div>`);
+function weekRow(t, kind){
+  const par = t.parent_id ? taskOf(t.parent_id) : null;
+  const sub = [];
+  if (kind === 'dl') sub.push('срок');
+  if (kind === 'over') sub.push('срок был ' + dm(t.due));
+  if (kind === 'due') sub.push(fmtDay(t.due));
+  sub.push(areaPath(t.area_id) || 'Входящие');
+  if (kind === 'plan' && t.due) sub.push('срок ' + fmtDay(t.due));
+  if (kind !== 'plan' && t.plan_date) sub.push('📌 ' + fmtDay(t.plan_date));
+  if (par) sub.push('↳ ' + par.title);
+  const star = kind === 'plan' ? (t.plan_order === 0 ? '★' : t.plan_order ? String(t.plan_order + 1) : '•') : kind === 'over' ? '!' : kind === 'none' ? '·' : '⏰';
+  return `<div class="wrow ${kind === 'dl' || kind === 'due' ? 'dl' : ''} ${kind === 'over' ? 'over' : ''}" data-id="${esc(t.id)}">
+    <span class="star">${star}</span>
+    <div class="t" data-act="edit"><div class="x">${esc(t.title)}</div><div class="s">${esc(sub.join(' · '))}</div></div>
+    <button class="rowmenu" data-act="move" aria-label="Назначить день">⋯</button></div>`;
+}
+function viewWeek(){
+  const td = today(), ws = addDays(weekStart(td), S.weekOff * 7), we = addDays(ws, 6);
+  const open = S.tasks.filter(isOpen);
+  let h = header('Неделя', `${dm(ws)} — ${dm(we)}`);
+  h += `<div class="wnav"><button data-act="wk" data-v="-1" aria-label="Прошлая неделя">‹</button><button class="cur" data-act="wk" data-v="0">${S.weekOff ? 'К текущей неделе' : 'Текущая неделя'}</button><button data-act="wk" data-v="1" aria-label="Следующая неделя">›</button></div>`;
+  const over = sortTasks(open.filter(t => t.due && t.due < td));
+  if (over.length){
+    h += `<div class="sec red">Срок прошёл<span class="n">${over.length}</span></div><div class="hint">Сроки не переносятся автоматически. Откройте задачу, чтобы изменить срок, или нажмите ⋯ и назначьте день работы.</div>`;
+    h += `<div class="day">${over.map(t => weekRow(t, 'over')).join('')}</div>`;
   }
-  const inboxN = S.tasks.filter(t => open(t) && !t.area_id).length;
-  h += `<div class="areas">`;
-  for (const a of kidsOf(null)){
-    const st = areaStats(a.id), nk = areaTree(a.id).length - 1;
-    const pct = st.all ? Math.round((st.all - st.open) / st.all * 100) : 0;
-    h += `<button class="area" style="--c:${esc(a.color)}" data-act="open-area" data-v="${esc(a.id)}">
-      <div class="em">${esc(a.emoji)}</div><div class="nm">${esc(a.name)}</div>
-      <div class="cnt">${st.open} ${plural(st.open,'задача','задачи','задач')}${nk ? ` · ${nk} ${plural(nk,'полка','полки','полок')}` : ''}${st.over ? ` · <span class="r">${st.over} горит</span>` : ''}</div>
-      <div class="bar"><i style="width:${pct}%"></i></div></button>`;
+  h += `<div class="sec">По дням</div>`;
+  for (let i = 0; i < 7; i++){
+    const d = addDays(ws, i);
+    const plan = open.filter(t => t.plan_date === d).sort((a, b) => (a.plan_order ?? 99) - (b.plan_order ?? 99) || byWork(a, b));
+    const dl = sortTasks(open.filter(t => t.due === d && t.plan_date !== d));
+    h += `<div class="day ${d === td ? 'today' : ''} ${d < td ? 'past' : ''}"><h4>${WDF[wday(d)]} <small>${dm(d)}</small>${d === td ? '<span class="tag">сегодня</span>' : ''}</h4>`;
+    h += plan.map(t => weekRow(t, 'plan')).join('') + dl.map(t => weekRow(t, 'dl')).join('');
+    if (!plan.length && !dl.length) h += `<div class="wempty">Ничего не запланировано</div>`;
+    h += `</div>`;
   }
-  h += `<button class="area" style="--c:var(--faint)" data-act="go" data-v="inbox"><div class="em">📥</div><div class="nm">Входящие</div><div class="cnt">${inboxN} ${plural(inboxN,'задача','задачи','задач')}</div></button>`;
-  h += `<button class="area" style="--c:var(--line);align-items:center;justify-content:center;color:var(--muted)" data-act="new-area"><div class="em">＋</div><div class="nm" style="font-size:14px">Новая полка</div></button>`;
+  const upcoming = open.filter(t => t.due && t.due >= td && t.due <= addDays(td, 13)).sort((a, b) => a.due < b.due ? -1 : a.due > b.due ? 1 : byWork(a, b));
+  h += `<div class="sec">Ближайшие сроки · 14 дней<span class="n">${upcoming.length}</span></div>`;
+  h += upcoming.length ? `<div class="day">${upcoming.map(t => weekRow(t, 'due')).join('')}</div>` : `<div class="hint">В ближайшие две недели сроков нет.</div>`;
+  const noplan = sortTasks(open.filter(t => isTop(t) && !t.due && !t.plan_date));
+  h += `<div class="sec">Без срока и без дня работы<span class="n">${noplan.length}</span><button class="toggle" data-act="tg" data-k="noplan">${S.open.noplan ? 'свернуть' : 'показать'}</button></div>`;
+  if (S.open.noplan) h += `<div class="hint">Эти задачи ещё нужно запланировать: нажмите ⋯ и выберите день.</div><div class="day">${noplan.slice(0, S.listLimit).map(t => weekRow(t, 'none')).join('')}</div>` +
+    (noplan.length > S.listLimit ? `<button class="more" data-act="more">Показать ещё (${noplan.length - S.listLimit})</button>` : '');
+  return h;
+}
+
+function viewWaiting(){
+  const td = today();
+  const W = S.tasks.filter(t => t.status === 'waiting').sort((a, b) =>
+    ((a.check_date && a.check_date <= td) ? 0 : 1) - ((b.check_date && b.check_date <= td) ? 0 : 1) ||
+    (a.check_date || '9999').localeCompare(b.check_date || '9999') || byWork(a, b));
+  let h = header('Ожидания', W.length ? counts(W) : 'Ничего не ждёт');
+  if (!W.length) return h + `<div class="empty"><b>⏳</b>Нет задач в ожидании.<br>Отправить задачу в ожидание можно кнопкой «Ждать» на её карточке.</div>`;
+  h += `<div class="list" style="gap:8px">`;
+  for (const t of W){
+    const chk = t.check_date && t.check_date <= td;
+    h += `<div class="pcard" data-id="${esc(t.id)}">
+      <div class="top">${chk ? '<span class="chip amber">🔔 пора проверить</span>' : ''}${t.priority === 1 ? '<span class="chip red">🔥</span>' : ''}${pendingIds().has(t.id) ? '<span class="chip pend">⟳ не отправлено</span>' : ''}</div>
+      <div class="ttl" data-act="edit">${esc(t.title)}</div>
+      <div class="meta" style="margin-top:0">${areaChip(t.area_id)}${dueChip(t)}</div>
+      ${t.wait_for ? `<div class="pline"><span class="k">Ждём:</span> ${esc(t.wait_for)}</div>`
+        : `<button class="linkbtn" data-act="wait">⚠ Не указано, кого или чего ждём — указать</button>`}
+      ${t.unblock_action ? `<div class="pline"><span class="k">Разблокирует:</span> ${esc(t.unblock_action)}</div>` : ''}
+      <div class="pline muted"><span class="k">Проверить:</span> ${t.check_date ? fmtDay(t.check_date) : 'дата не задана'}</div>
+      <div class="row" style="margin-top:4px">
+        <button class="btn pri" data-act="unwait">▶ Вернуть в работу</button>
+        <button class="btn" data-act="wait" style="flex:0 0 auto;padding:12px 14px">Изменить</button>
+        <button class="btn" data-act="edit" style="flex:0 0 auto;padding:12px 16px" aria-label="Подробности">⋯</button>
+      </div></div>`;
+  }
   return h + `</div>`;
 }
 
+function matchDue(t, f, td){
+  if (!f) return true;
+  if (f === 'over') return !!t.due && t.due < td && isOpen(t);
+  if (f === 'today') return t.due === td;
+  if (f === 'week') return !!t.due && t.due >= td && t.due <= addDays(td, 6);
+  if (f === 'has') return !!t.due;
+  if (f === 'none') return !t.due;
+  return true;
+}
+function viewList(){
+  const f = S.f, td = today();
+  const areaSet = f.area && f.area !== 'inbox' ? new Set(areaTree(f.area)) : null;
+  const passStatus = t => f.status === 'all' ? true : f.status === 'open' ? isOpen(t) : t.status === f.status;
+  const pass = t => passStatus(t) && (!f.prio || String(t.priority) === f.prio) && matchDue(t, f.due, td) &&
+    (f.area === 'inbox' ? !t.area_id : !areaSet || areaSet.has(t.area_id));
+  const q = f.q.trim().toLowerCase();
+  let res, flat;
+  if (q){ flat = true; res = sortTasks(S.tasks.filter(t => pass(t) && (t.title + ' ' + (t.notes || '') + ' ' + (t.next_step || '')).toLowerCase().includes(q))); }
+  else { flat = false; res = sortTasks(S.tasks.filter(t => isTop(t) && pass(t))); }
+  let h = header('Задачи', counts(S.tasks.filter(isOpen)) + ' открыто');
+  h += `<input class="search" id="search" type="search" placeholder="🔍 Поиск по названиям и заметкам" value="${esc(f.q)}" autocomplete="off">`;
+  h += `<div class="filters">
+    <select id="f-area" aria-label="Полка"><option value="">Все полки</option><option value="inbox" ${f.area === 'inbox' ? 'selected' : ''}>📥 Входящие</option>${areaOptions(f.area)}</select>
+    <select id="f-status" aria-label="Статус">${[['open','Открытые'],['todo','Не начаты'],['doing','В работе'],['waiting','Ждут'],['done','Выполненные'],['all','Все, с выполненными']].map(([v, l]) => `<option value="${v}" ${f.status === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <select id="f-prio" aria-label="Приоритет">${[['','Любой приоритет'],['1','🔥 Высокий'],['2','Обычный'],['3','Отложенный']].map(([v, l]) => `<option value="${v}" ${f.prio === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <select id="f-due" aria-label="Срок">${[['','Любой срок'],['over','Срок прошёл'],['today','Срок сегодня'],['week','Срок в 7 дней'],['has','Есть срок'],['none','Без срока']].map(([v, l]) => `<option value="${v}" ${f.due === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+  </div>`;
+  const filtered = q || f.area || f.status !== 'open' || f.prio || f.due;
+  const inside = q ? 0 : res.reduce((n, t) => n + descOf(t.id).filter(passStatus).length, 0);
+  h += `<div class="counter" id="counter">Найдено: ${q ? counts(res) : `${res.length} ${plural(res.length, 'задача', 'задачи', 'задач')}${inside ? ` · внутри ${inside} ${plural(inside, 'подзадача', 'подзадачи', 'подзадач')}` : ''}`}${filtered ? ' · <button class="linkbtn" data-act="freset" style="display:inline;min-height:0;padding:0">сбросить</button>' : ''}</div>`;
+  if (!res.length) return h + `<div class="empty">Ничего не найдено</div>`;
+  h += listOf(res.slice(0, S.listLimit), { flat });
+  if (res.length > S.listLimit) h += `<button class="more" data-act="more">Показать ещё (${res.length - S.listLimit})</button>`;
+  return h;
+}
+
+function areaStats(id){
+  const ids = new Set(areaTree(id));
+  const ts = S.tasks.filter(t => ids.has(t.area_id) && isOpen(t));
+  const top = ts.filter(isTop).length;
+  return { top, sub: ts.length - top, over: ts.filter(isOverdue).length };
+}
+const statLine = st => `${st.top} ${plural(st.top, 'задача', 'задачи', 'задач')}${st.sub ? ` · ${st.sub} ${plural(st.sub, 'подзадача', 'подзадачи', 'подзадач')}` : ''}${st.over ? ` · <span class="r">${st.over} просрочено</span>` : ''}`;
+function viewAreas(){
+  const inboxTop = S.tasks.filter(t => isOpen(t) && !t.area_id && isTop(t)).length;
+  let h = header('Полки', counts(S.tasks.filter(isOpen)) + ' открыто');
+  h += `<div class="areas">`;
+  for (const a of kidsOf(null)){
+    const st = areaStats(a.id), nk = areaTree(a.id).length - 1;
+    h += `<button class="area" style="--c:${esc(a.color)}" data-act="open-area" data-v="${esc(a.id)}"><div class="em">${esc(a.emoji)}</div><div class="nm">${esc(a.name)}</div>
+      <div class="cnt">${statLine(st)}${nk ? `<br>${nk} ${plural(nk, 'полка', 'полки', 'полок')} внутри` : ''}</div></button>`;
+  }
+  h += `<button class="area" style="--c:var(--faint)" data-act="inbox"><div class="em">📥</div><div class="nm">Входящие</div><div class="cnt">${inboxTop} ${plural(inboxTop, 'задача', 'задачи', 'задач')}</div></button>`;
+  h += `<button class="area" style="--c:var(--line);align-items:center;justify-content:center;color:var(--accent)" data-act="new-area"><div class="em">＋</div><div class="nm" style="font-size:14px">Новая полка</div></button>`;
+  return h + `</div>`;
+}
 function viewArea(){
   const a = areaOf(S.areaId);
   if (!a){ S.view = 'areas'; return viewAreas(); }
-  const chain = areaChain(a.id);
-  const parent = chain.length > 1 ? chain[chain.length - 2] : null;
-  const ts = S.tasks.filter(t => t.area_id === a.id);
-  const top = ts.filter(isTop);
-  const op = top.filter(open);
-  const st = areaStats(a.id);
+  const chain = areaChain(a.id), parent = chain.length > 1 ? chain[chain.length - 2] : null;
+  const ts = S.tasks.filter(t => t.area_id === a.id && isTop(t));
+  const op = ts.filter(isOpen), st = areaStats(a.id);
   const crumbs = chain.slice(0, -1).map(x => esc(x.name)).join(' › ');
-  const sub = `${crumbs ? crumbs + ' › ' : ''}${st.open} ${plural(st.open,'открытая','открытые','открытых')}${st.over ? ` · ${st.over} горит` : ''}`;
-  const editBtn = `<button class="icon-btn" data-act="edit-area" data-v="${esc(a.id)}" aria-label="Изменить полку">✎</button>`;
-  let h = header(`${esc(a.emoji)} ${esc(a.name)}`, sub, parent ? parent.id : 'areas', editBtn);
-  h += quickAdd(`Добавить в «${esc(a.name)}»…`);
+  let h = header(`${esc(a.emoji)} ${esc(a.name)}`, `${crumbs ? crumbs + ' › ' : ''}${statLine(st)}`,
+    { back: parent ? parent.id : 'areas', extra: `<button class="icon-btn" data-act="edit-area" data-v="${esc(a.id)}" aria-label="Изменить полку">✎</button>` });
   const kids = kidsOf(a.id);
   h += `<div class="sec">Полки внутри<span class="n">${kids.length}</span></div><div class="subareas">`;
-  for (const k of kids){
-    const ks = areaStats(k.id), nk = areaTree(k.id).length - 1;
-    h += `<button class="subarea" style="--c:${esc(k.color)}" data-act="open-area" data-v="${esc(k.id)}">
-      <span>${esc(k.emoji)}</span><span class="nm">${esc(k.name)}</span>
-      <span class="cnt">${ks.open}${nk ? ` · ${nk} 🗂` : ''}${ks.over ? ` · <span class="r">${ks.over}🔥</span>` : ''}</span><span class="go">›</span></button>`;
-  }
+  for (const k of kids){ const ks = areaStats(k.id);
+    h += `<button class="subarea" style="--c:${esc(k.color)}" data-act="open-area" data-v="${esc(k.id)}"><span>${esc(k.emoji)}</span><span class="nm">${esc(k.name)}</span><span class="cnt">${ks.top} зад. · ${ks.sub} подз.${ks.over ? ` · <span class="r">⏰${ks.over}</span>` : ''}</span><span style="color:var(--faint)">›</span></button>`; }
   h += `<button class="subarea add" data-act="new-area" data-v="${esc(a.id)}">＋ Полка внутри «${esc(a.name)}»</button></div>`;
-  h += section('В работе', sortTasks(op.filter(t => t.status === 'doing')), { hideArea: true, cls: 'accent' });
-  h += section('Сделать', sortTasks(op.filter(t => t.status === 'todo')), { hideArea: true });
-  h += section('Ждёт', sortTasks(op.filter(t => t.status === 'waiting')), { hideArea: true, cls: 'amber' });
-  if (!op.length && !kids.length) h += `<div class="empty"><b>✨</b>На этой полке пусто</div>`;
-  h += doneSection('a' + a.id, sortTasks(top.filter(t => !open(t))), { hideArea: true });
-  return h;
-}
-
-function viewInbox(){
-  const ts = S.tasks.filter(t => !t.area_id && isTop(t));
-  const op = sortTasks(ts.filter(open));
-  let h = header('Входящие', 'Всё, что пришло в голову');
-  h += quickAdd('Что пришло в голову?');
-  h += op.length ? `<div class="list">${op.map(t => taskRow(t, { hideArea: true })).join('')}</div>`
-                 : `<div class="empty"><b>📭</b>Входящие пусты.<br>Разложи задачи по полкам — нажми на задачу и выбери полку.</div>`;
-  h += doneSection('inbox', ts.filter(t => !open(t)), { hideArea: true });
-  return h;
-}
-
-function viewPlan(){
-  const td = today();
-  const op = S.tasks.filter(open);
-  let h = header('План', 'Ближайшие 2 недели');
-  const over = sortTasks(op.filter(isOver));
-  h += section('Просрочено', over, { cls: 'red', flat: true });
-  for (let i = 0; i < 14; i++){
-    const day = addDays(td, i);
-    const ts = sortTasks(op.filter(t => t.due === day));
-    if (!ts.length && i > 2) continue;
-    const d = dObj(day);
-    const title = `<span class="day-h">${i===0?'Сегодня':i===1?'Завтра':WDF[d.getDay()]}<small>${d.getDate()} ${MON[d.getMonth()]}</small></span>`;
-    h += section(title, ts, { hideDue: true, keep: true, cls: i===0 ? 'accent' : '', flat: true });
-    if (!ts.length) h += `<div class="hint" style="padding-left:4px">— свободно</div>`;
+  for (const [s, l, c] of [['doing', 'В работе', 'accent'], ['todo', 'Не начаты', ''], ['waiting', 'Ждут', 'amber']]){
+    const x = sortTasks(op.filter(t => t.status === s));
+    if (x.length) h += `<div class="sec ${c}">${l}<span class="n">${x.length}</span></div>` + listOf(x, { hideArea: true });
   }
-  const later = sortTasks(op.filter(t => t.due && t.due > addDays(td, 13)));
-  h += section('Позже', later, { flat: true });
-  const none = sortTasks(op.filter(t => !t.due));
-  h += section('Без срока', none.filter(isTop), { cls: '' });
+  if (!op.length && !kids.length) h += `<div class="empty"><b>✨</b>На этой полке пусто</div>`;
+  const dn = sortTasks(ts.filter(t => !isOpen(t)));
+  if (dn.length){
+    const k = 'a' + a.id;
+    h += `<div class="sec green">Готово<span class="n">${dn.length}</span><button class="toggle" data-act="tg" data-k="${k}">${S.open[k] ? 'скрыть' : 'показать'}</button></div>`;
+    if (S.open[k]) h += listOf(dn, { hideArea: true });
+  }
   return h;
 }
 
 function renderNav(){
-  const over = S.tasks.filter(isOver).length;
-  const inboxN = S.tasks.filter(t => open(t) && !t.area_id).length;
-  const b = (v, ic, label, badge) => `<button class="${(S.view===v || (v==='areas'&&S.view==='area'))?'on':''}" data-act="go" data-v="${v}">${ic}${badge?`<span class="badge">${badge}</span>`:''}${label}</button>`;
-  $('#nav').innerHTML = b('today', I.today, 'Сегодня', over) + b('areas', I.areas, 'Полки') +
-    `<button class="fab" data-act="new" aria-label="Новая задача">${I.plus}</button>` +
-    b('inbox', I.inbox, 'Входящие', inboxN) + b('plan', I.plan, 'План');
+  const td = today();
+  const waitCheck = S.tasks.filter(t => t.status === 'waiting' && t.check_date && t.check_date <= td).length;
+  const over = S.tasks.filter(isOverdue).length;
+  const b = (v, ic, label, badge, cls = '') => `<button class="${S.view === v || (v === 'areas' && S.view === 'area') ? 'on' : ''}" data-act="go" data-v="${v}">${ic}${badge ? `<span class="badge ${cls}">${badge}</span>` : ''}${label}</button>`;
+  $('#nav').innerHTML = b('today', I.today, 'Сегодня') + b('week', I.week, 'Неделя', over) + b('waiting', I.wait, 'Ожидания', waitCheck, 'amber') + b('list', I.list, 'Задачи') + b('areas', I.areas, 'Полки');
 }
-
 function render(){
-  const focusSearch = document.activeElement && document.activeElement.id === 'search';
-  const pos = focusSearch ? document.activeElement.selectionStart : 0;
-  const views = { today: viewToday, areas: viewAreas, area: viewArea, inbox: viewInbox, plan: viewPlan };
-  $('#app').innerHTML = (views[S.view] || viewToday)();
+  const ae = document.activeElement, keep = ae && ae.id === 'search', pos = keep ? ae.selectionStart : 0;
+  const V = { today: viewToday, week: viewWeek, waiting: viewWaiting, list: viewList, areas: viewAreas, area: viewArea };
+  $('#app').innerHTML = (V[S.view] || viewToday)();
   renderNav();
-  if (focusSearch){ const s = $('#search'); if (s){ s.focus(); s.setSelectionRange(pos, pos); } }
+  if (keep){ const s = $('#search'); if (s){ s.focus(); try{ s.setSelectionRange(pos, pos); }catch{} } }
+  if (sheetMode === 'picker') drawPickerList();
 }
-
 function go(v){
-  S.view = v; S.q = '';
-  LS.set('tc_view', v === 'area' ? 'area:' + S.areaId : v);
+  S.view = VIEWS.includes(v) ? v : 'today'; S.listLimit = 60;
+  LS.set('tc_view', S.view === 'area' ? 'area:' + S.areaId : S.view);
   render(); window.scrollTo(0, 0);
 }
 
-// ================= sheet / modal / toast =================
+// ================= шторки, меню, уведомления =================
 let sheetMode = null;
 function openSheet(html, mode){
   sheetMode = mode;
   $('#sheet-in').innerHTML = '<div class="grab"></div>' + html;
   $('#sheet').classList.add('show'); $('#backdrop').classList.add('show');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden'; $('#sheet-in').scrollTop = 0;
 }
-function closeSheet(){
-  $('#sheet').classList.remove('show'); $('#backdrop').classList.remove('show');
-  document.body.style.overflow = ''; sheetMode = null;
-}
+function closeSheet(){ $('#sheet').classList.remove('show'); $('#backdrop').classList.remove('show'); document.body.style.overflow = ''; sheetMode = null; }
 let tt;
-function toast(msg, err){
-  const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : '');
-  clearTimeout(tt); tt = setTimeout(() => t.className = 'toast', err ? 3500 : 1600);
-}
-function confirmBox(text, okLabel = 'Удалить'){
+function toast(msg, err){ const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(tt); tt = setTimeout(() => t.className = 'toast', err ? 4500 : 1800); }
+function choose(text, items){
   return new Promise(res => {
-    $('#modal-in').innerHTML = `<p>${text}</p><div class="row"><button class="btn" id="m-no">Отмена</button><button class="btn pri" id="m-yes" style="${okLabel==='Удалить'?'background:var(--red)':''}">${okLabel}</button></div>`;
+    $('#modal-in').innerHTML = `<p>${esc(text)}</p><div class="menu">${items.map(([v, ic, l, s], i) => `<button class="mi" data-i="${i}"><span class="ic">${ic}</span><span>${esc(l)}${s ? `<small>${esc(s)}</small>` : ''}</span></button>`).join('')}
+      <button class="mi" data-i="-1"><span class="ic">✕</span><span>Отмена</span></button></div>`;
     $('#modal').classList.add('show');
-    const done = v => { $('#modal').classList.remove('show'); res(v); };
-    $('#m-no').onclick = () => done(false); $('#m-yes').onclick = () => done(true);
+    $('#modal-in').onclick = e => { const b = e.target.closest('[data-i]'); if (!b) return; $('#modal').classList.remove('show'); const i = +b.dataset.i; res(i < 0 ? null : items[i][0]); };
   });
 }
+const confirmBox = async (text, ok = 'Удалить') => (await choose(text, [['yes', ok === 'Удалить' ? '🗑' : '✓', ok]])) === 'yes';
 
-// ================= editor =================
-let ed = null;
-function openEditor(task, defaults = {}){
-  ed = task ? { ...task, _id: task.id } : { title: '', notes: '', area_id: null, priority: 2, due: null, status: 'todo', ...defaults };
-  drawEditor(); setTimeout(() => { const i = $('#ed-title'); if (i && !task) i.focus(); }, 260);
+// ---------- меню «Перенести / план» ----------
+function openMoveMenu(id){
+  const t = taskOf(id); if (!t) return;
+  const td = today(), onToday = t.plan_date === td;
+  const days = []; for (let i = 0; i < 7; i++){ const d = addDays(td, i); if (d !== t.plan_date) days.push([d, i === 0 ? 'Сегодня' : i === 1 ? 'Завтра' : `${WDF[wday(d)]}`, dm(d)]); }
+  const nw = addDays(weekStart(td), 7);
+  openSheet(`<h2>${esc(t.title)}</h2>
+    <div class="hint">День работы — когда вы делаете задачу. Срок${t.due ? ` (${dm(t.due)})` : ''} при этом не меняется.</div>
+    ${onToday ? `<div class="lbl">Место в плане на сегодня</div><div class="menu">
+      <button class="mi ${t.plan_order === 0 ? 'on' : ''}" data-act="m-slot" data-v="main"><span class="ic">★</span><span>Главная задача дня</span></button>
+      <button class="mi ${t.plan_order === 1 || t.plan_order === 2 ? 'on' : ''}" data-act="m-slot" data-v="next"><span class="ic">2</span><span>Дальше (до двух задач)</span></button>
+      <button class="mi ${t.plan_order == null ? 'on' : ''}" data-act="m-slot" data-v="rest"><span class="ic">•</span><span>Остальные на сегодня</span></button></div>` : ''}
+    <div class="lbl">${t.plan_date ? `Запланировано: ${fmtDay(t.plan_date)} · перенести на` : 'Запланировать на'}</div>
+    <div class="mgrid">${days.map(([d, l, s]) => `<button class="mi" data-act="m-day" data-v="${d}"><span class="ic">📅</span><span>${l}<small>${s}</small></span></button>`).join('')}
+      ${nw !== t.plan_date ? `<button class="mi" data-act="m-day" data-v="${nw}"><span class="ic">⏭</span><span>След. неделя<small>${WD[wday(nw)]}, ${dm(nw)}</small></span></button>` : ''}
+      <label class="mi"><span class="ic">🗓</span><span>Другая дата<br><input type="date" id="m-date" style="background:none;border:0;color:var(--accent);font-size:14px;padding:4px 0;max-width:100%"></span></label>
+    </div>
+    <div class="menu" style="margin-top:6px">
+      ${t.plan_date ? `<button class="mi" data-act="m-day" data-v=""><span class="ic">✕</span><span>Убрать из плана<small>задача останется в списке, срок не изменится</small></span></button>` : ''}
+      <button class="mi" data-act="m-edit"><span class="ic">⋯</span><span>Открыть подробности</span></button>
+    </div>`, 'move:' + id);
+  $('#m-date').addEventListener('change', e => { if (e.target.value) moveTo(id, e.target.value); });
 }
-function syncEd(){ const t = $('#ed-title'), n = $('#ed-notes'); if (t) ed.title = t.value; if (n) ed.notes = n.value; }
+function moveTo(id, date){
+  closeSheet();
+  const t = taskOf(id); if (!t) return;
+  if ((t.plan_date || '') === (date || '')) return;
+  upd(id, { plan_date: date || null, plan_order: null }, date ? `День работы: ${fmtDay(date)}` : 'Убрано из плана');
+}
+
+// ---------- выбор задач в план дня ----------
+let pickMode = 'main';
+function openPicker(mode){
+  pickMode = mode; S.pick.q = '';
+  const title = mode === 'main' ? 'Главная задача дня' : mode === 'next' ? 'Следующая задача' : 'Добавить в план дня';
+  openSheet(`<h2>${title}</h2>
+    <div class="hint">${mode === 'main' ? 'Одна задача, которую важнее всего сделать сегодня.' : 'Выберите задачу.'} Срок задачи не изменится — назначается только день работы.</div>
+    <input class="search" id="pk-q" type="search" placeholder="🔍 Найти задачу" autocomplete="off">
+    <div class="filters" style="grid-template-columns:1fr 1fr">
+      <select id="pk-area" aria-label="Полка"><option value="">Все полки</option><option value="inbox" ${S.pick.area === 'inbox' ? 'selected' : ''}>📥 Входящие</option>${areaOptions(S.pick.area)}</select>
+      <select id="pk-subs" aria-label="Подзадачи"><option value="0">Только задачи</option><option value="1" ${S.pick.subs ? 'selected' : ''}>Задачи и подзадачи</option></select>
+    </div>
+    <div id="pk-list"></div>`, 'picker');
+  $('#pk-q').addEventListener('input', e => { S.pick.q = e.target.value; drawPickerList(); });
+  $('#pk-area').addEventListener('change', e => { S.pick.area = e.target.value; drawPickerList(); });
+  $('#pk-subs').addEventListener('change', e => { S.pick.subs = e.target.value === '1'; drawPickerList(); });
+  drawPickerList();
+}
+function drawPickerList(){
+  const box = $('#pk-list'); if (!box) return;
+  const td = today(), q = S.pick.q.trim().toLowerCase(), p = planOf(td);
+  const areaSet = S.pick.area && S.pick.area !== 'inbox' ? new Set(areaTree(S.pick.area)) : null;
+  const inPlan = t => t.plan_date === td;
+  const c = S.tasks.filter(t => isOpen(t) && (S.pick.subs || q || isTop(t)) &&
+    (S.pick.area === 'inbox' ? !t.area_id : !areaSet || areaSet.has(t.area_id)) &&
+    (!q || (t.title + ' ' + (t.notes || '')).toLowerCase().includes(q))).sort((a, b) => inPlan(b) - inPlan(a) || byWork(a, b));
+  const lim = 80;
+  box.innerHTML = (c.length ? '' : '<div class="hint">Ничего не найдено</div>') + c.slice(0, lim).map(t => {
+    const tag = p.main && p.main.id === t.id ? 'главная' : p.next.some(x => x.id === t.id) ? 'дальше' : inPlan(t) ? 'в плане' : '';
+    const par = t.parent_id ? taskOf(t.parent_id) : null;
+    const sub = [areaPath(t.area_id) || 'Входящие', t.due ? 'срок ' + fmtDay(t.due) : '', t.priority === 1 ? '🔥' : '', t.status !== 'todo' ? STATUS[t.status] : '', par ? '↳ ' + par.title : ''].filter(Boolean).join(' · ');
+    return `<div class="prow" data-act="pk" data-v="${esc(t.id)}"><div class="t"><div class="x">${esc(t.title)}</div><div class="s">${esc(sub)}</div></div>${tag ? `<span class="in">${tag}</span>` : ''}</div>`;
+  }).join('') + (c.length > lim ? `<div class="hint">Показаны первые ${lim} из ${c.length} — уточните поиск или полку.</div>` : '');
+}
+function pickTask(id){
+  if (setSlot(id, today(), pickMode)){ closeSheet(); if (pickMode === 'rest') S.open.rest = true; render(); }
+}
+
+// ---------- ожидание ----------
+let waitDate = '';
+function waitPicks(){
+  const td = today(), chips = [['Завтра', addDays(td, 1)], ['Через 3 дня', addDays(td, 3)], ['Через неделю', addDays(td, 7)], ['Без даты', '']];
+  const custom = waitDate && !chips.some(c => c[1] === waitDate);
+  return chips.map(([l, v]) => `<button class="pick ${waitDate === v ? 'on' : ''}" data-act="w-d" data-v="${v}">${l}</button>`).join('') +
+    `<label class="pick ${custom ? 'on' : ''}">📅 <input type="date" id="w-date" value="${custom ? waitDate : ''}" aria-label="Дата проверки"></label>`;
+}
+function bindWaitDate(){ const d = $('#w-date'); if (d) d.addEventListener('change', e => { waitDate = e.target.value; $('#w-picks').innerHTML = waitPicks(); bindWaitDate(); }); }
+function openWaitSheet(id){
+  const t = taskOf(id); if (!t) return;
+  waitDate = t.check_date || '';
+  openSheet(`<h2>Ожидание</h2><div class="hint">${esc(t.title)}</div>
+    <div class="lbl">Кого или чего ждём</div><input class="fld" id="w-for" value="${esc(t.wait_for || '')}" placeholder="Например: ответ Ильи, оплата клиента" autocomplete="off">
+    <div class="lbl">Что разблокирует задачу</div><input class="fld" id="w-unb" value="${esc(t.unblock_action || '')}" placeholder="Например: Илья согласует макет" autocomplete="off">
+    <div class="lbl">Следующая проверка <small>— не срок задачи</small></div><div class="picks" id="w-picks">${waitPicks()}</div>
+    <div class="row"><button class="btn" data-act="close">Отмена</button><button class="btn pri" data-act="w-save" data-v="${esc(id)}">${t.status === 'waiting' ? 'Сохранить' : 'Отправить в ожидание'}</button></div>`, 'wait');
+  bindWaitDate();
+  if (!t.wait_for) setTimeout(() => { const i = $('#w-for'); if (i) i.focus(); }, 250);
+}
+function saveWait(id){
+  const t = taskOf(id); if (!t) return;
+  const wf = $('#w-for').value.trim(), ub = $('#w-unb').value.trim(), cd = waitDate || null;
+  const patch = {};
+  if (t.status !== 'waiting') patch.status = 'waiting';
+  if ((t.wait_for || '') !== wf) patch.wait_for = wf;
+  if ((t.unblock_action || '') !== ub) patch.unblock_action = ub;
+  if ((t.check_date || null) !== cd) patch.check_date = cd;
+  closeSheet();
+  if (Object.keys(patch).length) upd(id, patch, t.status === 'waiting' ? 'Ожидание обновлено' : 'Задача в ожидании');
+}
+
+// ================= карточка задачи =================
+let ed = null;
 function areaOptions(selected, excludeId){
   const bad = excludeId ? new Set(areaTree(excludeId)) : new Set();
-  return flatAreas().filter(({ a }) => !bad.has(a.id))
-    .map(({ a, depth }) => `<option value="${esc(a.id)}" ${a.id === selected ? 'selected' : ''}>${'    '.repeat(depth)}${esc(a.emoji)} ${esc(a.name)}</option>`).join('');
+  return flatAreas().filter(({ a }) => !bad.has(a.id)).map(({ a, depth }) =>
+    `<option value="${esc(a.id)}" ${a.id === selected ? 'selected' : ''}>${'&nbsp;&nbsp;&nbsp;'.repeat(depth)}${esc(a.emoji)} ${esc(a.name)}</option>`).join('');
+}
+const slotOf = t => t && t.plan_date ? (t.plan_order === 0 ? 'main' : (t.plan_order === 1 || t.plan_order === 2) ? 'next' : 'rest') : 'rest';
+function openEditor(task, defaults = {}){
+  ed = task ? { ...task, _id: task.id, _slot: slotOf(task) }
+            : { id: uid(), title: '', notes: '', area_id: null, priority: 2, due: null, status: 'todo', plan_date: null, next_step: '', done_criteria: '',
+                wait_for: '', unblock_action: '', check_date: null, parent_id: null, _slot: 'rest', ...defaults };
+  drawEditor();
+  if (!task) setTimeout(() => { const i = $('#ed-title'); if (i) i.focus(); }, 260);
+}
+function syncEd(){
+  const map = { 'ed-title': 'title', 'ed-notes': 'notes', 'ed-next': 'next_step', 'ed-crit': 'done_criteria', 'ed-wf': 'wait_for', 'ed-ub': 'unblock_action' };
+  for (const [k, f] of Object.entries(map)){ const e = $('#' + k); if (e) ed[f] = e.value; }
+  const a = $('#ed-area'); if (a) ed.area_id = a.value || null;
+  const sl = $('#ed-slot'); if (sl) ed._slot = sl.value;
+}
+function dateRow(field, choices, label){
+  const val = ed[field] || null, custom = val && !choices.some(c => (c[1] || null) === val);
+  return `<div class="picks">${choices.map(([l, v]) => `<button class="pick ${(val || null) === (v || null) ? 'on' : ''}" data-act="ed-date" data-f="${field}" data-v="${v || ''}">${l}</button>`).join('')}
+    <label class="pick ${custom ? 'on' : ''}">📅 <input type="date" data-f="${field}" class="ed-dt" value="${custom ? val : ''}" aria-label="${label}"></label></div>`;
 }
 function drawEditor(){
-  const td = today();
-  const dueChoices = [['Сегодня', td], ['Завтра', addDays(td,1)], ['Через неделю', addDays(td,7)], ['Без срока', null]];
-  const customDue = ed.due && !dueChoices.some(c => c[1] === ed.due);
-  const pk = (on, act, v, label) => `<button class="pick ${on?'on':''}" data-act="${act}" data-v="${v ?? ''}">${label}</button>`;
+  const td = today(), isNew = !ed._id;
   const par = ed.parent_id ? taskOf(ed.parent_id) : null;
   const subs = ed._id ? sortTasks(subsOf(ed._id)) : [];
+  const pk = (on, act, v, label) => `<button class="pick ${on ? 'on' : ''}" data-act="${act}" data-v="${v}">${label}</button>`;
+  const showWait = ed.status === 'waiting' || ed.wait_for || ed.unblock_action || ed.check_date;
   openSheet(`
-    <h2>${ed._id ? (par ? 'Подзадача' : 'Задача') : (par ? 'Новая подзадача' : 'Новая задача')}</h2>
-    ${par ? `<div class="parent-link" data-act="ed-open" data-v="${esc(par.id)}">↳ внутри «${esc(par.title)}» — открыть</div>` : ''}
-    <input class="fld big" id="ed-title" placeholder="Что нужно сделать?" value="${esc(ed.title)}" autocomplete="off" enterkeyhint="done">
-    <textarea class="fld" id="ed-notes" placeholder="Заметка, детали, контакты…">${esc(ed.notes)}</textarea>
-    ${ed._id ? `<div class="lbl">Подзадачи${subs.length ? ` · ${subs.filter(x => x.status === 'done').length}/${subs.length}` : ''}</div>
-    <div>${subs.map(c => { const n = subsOf(c.id).length; return `<div class="subrow ${c.status==='done'?'done':''}">
-        <button class="chk" data-act="ed-sub-toggle" data-v="${esc(c.id)}"></button>
-        <span class="t" data-act="ed-open" data-v="${esc(c.id)}">${esc(c.title)}</span>${n ? `<span class="n">☰ ${n}</span>` : ''}</div>`; }).join('')}</div>
-    <form class="quick" data-form="sub" style="margin:8px 0 4px"><input id="ed-sub" placeholder="＋ Подзадача" autocomplete="off" enterkeyhint="done"><button type="submit">+</button></form>` : ''}
-    <div class="lbl">Полка</div>
-    <select class="fld" id="ed-area"><option value="">📥 Входящие</option>${areaOptions(ed.area_id)}</select>
-    <div class="lbl">Срок</div>
-    <div class="picks">${dueChoices.map(([l, v]) => pk(ed.due === v, 'ed-due', v, l)).join('')}
-      <label class="pick ${customDue?'on':''}">📅 <input type="date" id="ed-date" value="${customDue ? ed.due : ''}"></label></div>
-    <div class="lbl">Приоритет</div>
-    <div class="picks">${[1,2,3].map(p => pk(ed.priority === p, 'ed-prio', p, PRIO[p])).join('')}</div>
+    <h2>${isNew ? (par ? 'Новая подзадача' : 'Новая задача') : (par ? 'Подзадача' : 'Задача')}</h2>
+    ${par ? `<span class="parent-link" data-act="ed-open" data-v="${esc(par.id)}">↳ внутри «${esc(par.title)}» — открыть</span>` : ''}
+    <textarea class="fld big" id="ed-title" rows="${Math.min(5, Math.max(2, Math.ceil((ed.title || '').length / 30)))}" placeholder="Что нужно сделать?">${esc(ed.title)}</textarea>
     <div class="lbl">Статус</div>
     <div class="picks">${Object.entries(STATUS).map(([k, l]) => pk(ed.status === k, 'ed-status', k, l)).join('')}</div>
+    <div class="lbl">Следующий шаг</div>
+    <input class="fld" id="ed-next" value="${esc(ed.next_step || '')}" placeholder="Конкретное ближайшее действие" autocomplete="off">
+    <div class="lbl">Критерий готовности <small>— необязательно</small></div>
+    <input class="fld" id="ed-crit" value="${esc(ed.done_criteria || '')}" placeholder="Когда задачу можно считать сделанной" autocomplete="off">
+    <div class="lbl">День работы <small>— когда делаете; срок не меняется</small></div>
+    ${dateRow('plan_date', [['Сегодня', td], ['Завтра', addDays(td, 1)], ['Не запланировано', '']], 'Другой день работы')}
+    ${ed.plan_date ? `<select class="fld" id="ed-slot" aria-label="Место в плане дня">
+      <option value="main" ${ed._slot === 'main' ? 'selected' : ''}>★ Главная задача этого дня</option>
+      <option value="next" ${ed._slot === 'next' ? 'selected' : ''}>Дальше (2-я или 3-я по порядку)</option>
+      <option value="rest" ${ed._slot === 'rest' ? 'selected' : ''}>Остальные задачи дня</option></select>` : ''}
+    <div class="lbl">Срок (дедлайн)</div>
+    ${dateRow('due', [['Сегодня', td], ['Завтра', addDays(td, 1)], ['Через неделю', addDays(td, 7)], ['Без срока', '']], 'Другой срок')}
+    <div class="lbl">Приоритет</div>
+    <div class="picks">${[1, 2, 3].map(p => pk(ed.priority === p, 'ed-prio', p, (p === 1 ? '🔥 ' : '') + PRIO[p])).join('')}</div>
+    <div class="lbl">Полка</div>
+    <select class="fld" id="ed-area" aria-label="Полка"><option value="">📥 Входящие</option>${areaOptions(ed.area_id)}</select>
+    ${showWait ? `<div class="box"><div class="lbl" style="margin-top:0">Ожидание</div>
+      <input class="fld" id="ed-wf" value="${esc(ed.wait_for || '')}" placeholder="Кого или чего ждём" autocomplete="off">
+      <input class="fld" id="ed-ub" value="${esc(ed.unblock_action || '')}" placeholder="Что разблокирует задачу" autocomplete="off">
+      <div class="lbl">Следующая проверка <small>— не срок</small></div>
+      ${dateRow('check_date', [['Завтра', addDays(td, 1)], ['Через 3 дня', addDays(td, 3)], ['Через неделю', addDays(td, 7)], ['Без даты', '']], 'Дата проверки')}</div>` : ''}
+    <div class="lbl">Заметки</div>
+    <textarea class="fld" id="ed-notes" rows="3" placeholder="Детали, контакты, ссылки…">${esc(ed.notes || '')}</textarea>
+    ${!isNew ? `<div class="lbl">Подзадачи${subs.length ? ` · ${subs.filter(x => x.status === 'done').length}/${subs.length}` : ''}</div>
+      <div>${subs.map(c => { const n = subsOf(c.id).length; return `<div class="subrow ${c.status === 'done' ? 'done' : ''}" data-id="${esc(c.id)}">
+        <button class="chk" data-act="ed-sub-toggle" data-v="${esc(c.id)}" aria-label="Отметить"><i></i></button>
+        <span class="t" data-act="ed-open" data-v="${esc(c.id)}">${esc(c.title)}</span>${n ? `<span class="n">☰ ${n}</span>` : ''}</div>`; }).join('')}</div>
+      <form class="quick" data-form="sub"><input id="ed-sub" placeholder="＋ Новая подзадача" autocomplete="off" enterkeyhint="done"><button type="submit" aria-label="Добавить подзадачу">+</button></form>` : ''}
     <div class="row">
-      ${ed._id ? `<button class="btn danger" data-act="ed-del">Удалить</button>` : `<button class="btn" data-act="close">Отмена</button>`}
-      <button class="btn pri" data-act="ed-save">Сохранить</button>
+      ${isNew ? `<button class="btn" data-act="close">Отмена</button>` : `<button class="btn danger" data-act="ed-del">Удалить</button>`}
+      <button class="btn pri" data-act="ed-save">${isNew ? 'Создать' : 'Сохранить'}</button>
     </div>`, 'editor');
-  $('#ed-date').addEventListener('change', e => { syncEd(); ed.due = e.target.value || null; drawEditorKeep(); });
-  $('#ed-area').addEventListener('change', e => { ed.area_id = e.target.value || null; });
-  $('#ed-title').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveEditor(); } });
+  document.querySelectorAll('.ed-dt').forEach(inp => inp.addEventListener('change', e => { syncEd(); ed[e.target.dataset.f] = e.target.value || null; redrawEditor(); }));
 }
-function drawEditorKeep(){ const sc = $('#sheet-in').scrollTop; drawEditor(); $('#sheet-in').scrollTop = sc; }
+function redrawEditor(){ const sc = $('#sheet-in').scrollTop; drawEditor(); $('#sheet-in').scrollTop = sc; }
+const FIELDS = ['title', 'notes', 'area_id', 'priority', 'due', 'status', 'plan_date', 'next_step', 'done_criteria', 'wait_for', 'unblock_action', 'check_date'];
+const norm = (k, v) => (TEXT_FIELDS.includes(k) || k === 'notes') ? (v || '') : (v ?? null);
 async function saveEditor(keepOpen){
   syncEd();
-  const title = ed.title.trim();
-  if (!title){ if (keepOpen) return true; toast('Напиши, что нужно сделать', true); $('#ed-title').focus(); return false; }
-  const data = { title, notes: ed.notes.trim(), area_id: ed.area_id || null, priority: ed.priority, due: ed.due || null, status: ed.status };
-  const id = ed._id;
-  if (!keepOpen) closeSheet();
-  if (id){
-    const old = taskOf(id); if (!old) return true;
-    const p = {}; for (const k in data) if ((old[k] ?? null) !== (data[k] ?? null)) p[k] = data[k];
-    if (Object.keys(p).length) await patchTask(id, p, keepOpen ? null : 'Сохранено');
-  } else {
-    if (ed.parent_id) data.parent_id = ed.parent_id;
-    await createTask(data);
+  const title = (ed.title || '').trim();
+  if (!title){ if (keepOpen) return true; toast('Напишите, что нужно сделать', true); $('#ed-title').focus(); return false; }
+  const data = { title, notes: (ed.notes || '').trim(), area_id: ed.area_id || null, priority: ed.priority, due: ed.due || null, status: ed.status,
+    plan_date: ed.plan_date || null, next_step: (ed.next_step || '').trim(), done_criteria: (ed.done_criteria || '').trim(),
+    wait_for: (ed.wait_for || '').trim(), unblock_action: (ed.unblock_action || '').trim(), check_date: ed.check_date || null };
+  const slot = data.plan_date ? ed._slot : 'rest';
+  if (!ed._id){
+    if (!keepOpen) closeSheet();
+    await commit({ type: 'addTask', task: { id: ed.id, parent_id: ed.parent_id || null, ...data, plan_order: null } }, keepOpen ? null : 'Задача создана');
+    if (data.plan_date && slot !== 'rest') setSlot(ed.id, data.plan_date, slot);
+    return true;
   }
+  const id = ed._id, old = taskOf(id); if (!old){ closeSheet(); return true; }
+  const p = {};
+  for (const k of FIELDS) if (norm(k, old[k]) !== norm(k, data[k])) p[k] = data[k];
+  const extra = {};
+  if (p.status === 'done' && openDesc(id)){
+    const ch = await askSubtasks(openDesc(id));
+    if (!ch) return false;
+    extra.subtasks = ch;
+  }
+  if (!keepOpen) closeSheet();
+  if (Object.keys(p).length) await commit({ type: 'updateTask', id, patch: p, ...extra }, keepOpen ? null : 'Сохранено');
+  const cur = taskOf(id);
+  if (data.plan_date && slot !== slotOf(cur)) setSlot(id, data.plan_date, slot);
+  else if (!Object.keys(p).length && !keepOpen) toast('Без изменений');
   return true;
 }
-async function editorOpen(id){
-  await saveEditor(true);
-  const t = taskOf(id); if (t) openEditor(t);
-}
+async function editorOpen(id){ if (await saveEditor(true)){ const t = taskOf(id); if (t) openEditor(t); } }
 async function editorAddSub(){
   const inp = $('#ed-sub'); const title = inp.value.trim(); if (!title) return;
-  syncEd(); const pid = ed._id;
-  await createTask({ title, parent_id: pid, area_id: ed.area_id || null });
+  if (!(await saveEditor(true))) return;
+  const pid = ed._id;
+  await commit({ type: 'addTask', task: { id: uid(), title, parent_id: pid, area_id: (taskOf(pid) || {}).area_id || null } }, null);
   S.expanded.add(pid); LS.set('tc_exp', [...S.expanded]);
-  if (ed && ed._id === pid){ drawEditorKeep(); const i = $('#ed-sub'); if (i) i.focus(); }
+  ed = { ...taskOf(pid), _id: pid, _slot: slotOf(taskOf(pid)) }; redrawEditor();
+  const i = $('#ed-sub'); if (i) i.focus();
 }
 
-// ================= shelves editor =================
+// ================= полки =================
 function openAreaEditor(area, parentId){
-  const a = area || { name: '', emoji: '📁', color: (areaOf(parentId)||{}).color || '#6c8cff', parent_id: parentId || null };
-  const nT = area ? S.tasks.filter(t => t.area_id === area.id).length : 0, nK = area ? kidsOf(area.id).length : 0;
-  openSheet(`
-    <h2>${area ? 'Полка' : (parentId ? 'Полка внутри «' + esc(areaOf(parentId).name) + '»' : 'Новая полка')}</h2>
-    <div class="arow"><input class="fld em-in" id="ae-em" value="${esc(a.emoji)}" maxlength="4"><input class="fld" id="ae-name" placeholder="Название" value="${esc(a.name)}" autocomplete="off"><input type="color" id="ae-color" value="${esc(a.color)}"></div>
+  const a = area || { name: '', emoji: '📁', color: (areaOf(parentId) || {}).color || '#6c8cff', parent_id: parentId || null };
+  const st = area ? areaStats(area.id) : null, nK = area ? kidsOf(area.id).length : 0;
+  openSheet(`<h2>${area ? 'Полка' : parentId ? 'Полка внутри «' + esc(areaOf(parentId).name) + '»' : 'Новая полка'}</h2>
+    <div class="arow"><input class="fld em-in" id="ae-em" value="${esc(a.emoji)}" maxlength="4" aria-label="Эмодзи"><input class="fld" id="ae-name" placeholder="Название" value="${esc(a.name)}" autocomplete="off"><input type="color" id="ae-color" value="${esc(a.color)}" aria-label="Цвет"></div>
     <div class="lbl">Где лежит</div>
-    <select class="fld" id="ae-parent"><option value="">— верхний уровень —</option>${areaOptions(a.parent_id, area ? area.id : null)}</select>
-    ${area && (nT || nK) ? `<div class="hint">Внутри: ${nT} ${plural(nT,'задача','задачи','задач')}, ${nK} ${plural(nK,'полка','полки','полок')}. При удалении они переедут уровнем выше.</div>` : ''}
-    <div class="row">
-      ${area ? `<button class="btn danger" data-act="ae-del" data-v="${esc(area.id)}">Удалить</button>` : `<button class="btn" data-act="close">Отмена</button>`}
-      <button class="btn pri" data-act="ae-save" data-v="${area ? esc(area.id) : ''}">Сохранить</button>
-    </div>`, 'area');
-  setTimeout(() => { const i = $('#ae-name'); if (i && !area) i.focus(); }, 260);
-  $('#ae-name').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveArea(area ? area.id : ''); } });
+    <select class="fld" id="ae-parent" aria-label="Родительская полка"><option value="">— верхний уровень —</option>${areaOptions(a.parent_id, area ? area.id : null)}</select>
+    ${area && (st.top || st.sub || nK) ? `<div class="hint">Внутри: ${statLine(st)}${nK ? `, ${nK} ${plural(nK, 'полка', 'полки', 'полок')}` : ''}. При удалении полки всё это переедет уровнем выше.</div>` : ''}
+    <div class="row">${area ? `<button class="btn danger" data-act="ae-del" data-v="${esc(area.id)}">Удалить</button>` : `<button class="btn" data-act="close">Отмена</button>`}
+      <button class="btn pri" data-act="ae-save" data-v="${area ? esc(area.id) : ''}">Сохранить</button></div>`, 'area');
 }
-async function saveArea(id){
+function saveArea(id){
   const name = $('#ae-name').value.trim(), emoji = $('#ae-em').value.trim() || '📁', color = $('#ae-color').value, parent_id = $('#ae-parent').value || null;
-  if (!name){ toast('Напиши название полки', true); return; }
+  if (!name){ toast('Напишите название полки', true); return; }
   closeSheet();
   if (id){
     const a = areaOf(id); if (!a) return;
     const p = {}; if (a.name !== name) p.name = name; if (a.emoji !== emoji) p.emoji = emoji; if (a.color !== color) p.color = color;
-    if ((a.parent_id||null) !== parent_id) p.parent_id = parent_id;
-    if (!Object.keys(p).length) return;
-    await act(() => Object.assign(a, p), () => api().updateArea(id, p), 'Полка сохранена');
-    cacheSave();
-  } else {
-    const tmp = { id: 'tmp-' + uid(), name, emoji, color, parent_id, sort: 999 };
-    const r = await act(() => S.areas.push(tmp), () => api().addArea({ name, emoji, color, parent_id }), 'Полка создана');
-    if (r){ const i = S.areas.indexOf(tmp); if (i >= 0) S.areas[i] = r; cacheSave(); render(); }
-  }
+    if ((a.parent_id || null) !== parent_id) p.parent_id = parent_id;
+    if (Object.keys(p).length) commit({ type: 'updateArea', id, patch: p }, 'Полка сохранена');
+  } else commit({ type: 'addArea', area: { id: uid(), name, emoji, color, parent_id } }, 'Полка создана');
 }
 async function deleteArea(id){
   const ar = areaOf(id); if (!ar) return;
-  if (!await confirmBox(`Удалить полку «${esc(ar.name)}»? Её задачи и полки переедут уровнем выше.`)) return;
+  if (!await confirmBox(`Удалить полку «${ar.name}»? Её задачи и полки переедут уровнем выше.`)) return;
   closeSheet();
   const par = ar.parent_id || null;
-  await act(() => { S.areas.forEach(x => { if (x.parent_id === id) x.parent_id = par; }); S.tasks.forEach(t => { if (t.area_id === id) t.area_id = par; }); S.areas = S.areas.filter(x => x.id !== id); },
-            () => api().deleteArea(id), 'Полка удалена');
-  cacheSave();
+  commit({ type: 'deleteArea', id }, 'Полка удалена');
   if (S.view === 'area' && S.areaId === id){ if (par){ S.areaId = par; go('area'); } else go('areas'); }
 }
 
-// ================= settings =================
+// ================= настройки, облако, копии =================
 function openSettings(){
-  const st = cfg ? `<span class="sync-dot ${S.syncErr?'err':'on'}"></span>${S.syncErr ? 'Облако: ошибка — ' + esc(S.syncErr) : 'Облако Supabase подключено'}`
-                 : `<span class="sync-dot"></span>Только на этом устройстве`;
+  const st = cfg ? `<span class="sync-dot ${S.netDown ? 'wait' : S.syncErr ? 'err' : 'on'}"></span>${S.netDown ? 'Нет связи — изменения ждут отправки' : S.syncErr ? 'Ошибка: ' + esc(S.syncErr) : 'Облако подключено'}` : `<span class="sync-dot"></span>Только на этом устройстве`;
   const c = cfg || {};
-  openSheet(`
-    <h2>Настройки</h2>
-    <div class="status-box">${st}</div>
-
-    <h3>☁️ Облако (Supabase)</h3>
+  openSheet(`<h2>Настройки</h2><div class="status-box">${st}</div>
+    <h3>☁️ Облако</h3>
     <div class="hint">Задачи общие на всех устройствах и в ChatGPT. Ключ вводится один раз на устройстве.</div>
-    <input class="fld" id="s-key" placeholder="Ключ приложения" value="${esc(c.key||'')}" autocomplete="off" autocapitalize="off">
+    <input class="fld" id="s-key" placeholder="Ключ приложения" value="${esc(c.key || '')}" autocomplete="off" autocapitalize="off">
     <details style="margin-bottom:10px"><summary class="hint" style="cursor:pointer">Другой проект Supabase</summary>
-      <input class="fld" id="s-url" placeholder="Project URL: https://xxxx.supabase.co" value="${esc(c.url||CLOUD.url)}" autocomplete="off" autocapitalize="off">
-      <input class="fld" id="s-anon" placeholder="Publishable / anon key" value="${esc(c.anon||CLOUD.anon)}" autocomplete="off" autocapitalize="off">
-    </details>
-    <div class="row" style="margin-top:4px">
-      ${cfg ? `<button class="btn" data-act="s-disconnect">Отключить</button>` : ''}
-      <button class="btn pri" data-act="s-connect">${cfg ? 'Сохранить' : 'Подключить'}</button>
-    </div>
+      <input class="fld" id="s-url" placeholder="Project URL" value="${esc(c.url || CLOUD.url)}" autocomplete="off" autocapitalize="off">
+      <input class="fld" id="s-anon" placeholder="Publishable / anon key" value="${esc(c.anon || CLOUD.anon)}" autocomplete="off" autocapitalize="off"></details>
+    <div class="row" style="margin-top:4px">${cfg ? `<button class="btn" data-act="s-disconnect">Отключить</button>` : ''}<button class="btn pri" data-act="s-connect">${cfg ? 'Сохранить' : 'Подключить'}</button></div>
     ${cfg ? `<button class="btn" style="width:100%;margin-top:8px" data-act="s-link">📲 Подключить другое устройство</button>
-    <div class="hint">Отправь ссылку себе (например, в «Избранное» Telegram) и открой на телефоне — подключится без ввода ключа. Никому её не пересылай.</div>` : ''}
-
-    <h3>🤖 ChatGPT</h3>
-    <div class="hint">${cfg ? 'Получи готовую схему и инструкцию для своего GPT — значения уже подставлены.' : 'Сначала подключи облако.'}</div>
-    <button class="btn" style="width:100%" data-act="s-gpt" ${cfg?'':'disabled'}>Настройки для ChatGPT</button>
-
+      <div class="hint">Отправьте ссылку себе и откройте на телефоне — подключится без ввода ключа. Никому её не пересылайте.</div>` : ''}
     <h3>🗂 Полки</h3>
-    <div id="s-areas">${flatAreas().map(({ a, depth }) => `<div class="arow" style="margin-left:${depth * 18}px">
-        <button class="fld" style="text-align:left" data-act="edit-area" data-v="${esc(a.id)}"><span class="dot" style="background:${esc(a.color)};margin-right:8px"></span>${esc(a.emoji)} ${esc(a.name)}</button>
-        <button class="del" data-act="new-area" data-v="${esc(a.id)}" style="color:var(--accent)">＋</button></div>`).join('')}</div>
-    <button class="btn" style="width:100%;margin-top:4px" data-act="new-area">＋ Добавить полку</button>
-
+    <div>${flatAreas().map(({ a, depth }) => `<div class="arow" style="margin-left:${depth * 16}px">
+      <button class="fld" style="text-align:left;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" data-act="edit-area" data-v="${esc(a.id)}"><span class="dot" style="background:${esc(a.color)};margin-right:8px"></span>${esc(a.emoji)} ${esc(a.name)}</button>
+      <button class="del" data-act="new-area" data-v="${esc(a.id)}" style="color:var(--accent)" aria-label="Полка внутри">＋</button></div>`).join('')}</div>
+    <button class="btn" style="width:100%;margin-top:4px" data-act="new-area">＋ Новая полка</button>
     <h3>💾 Резервная копия</h3>
-    <div class="row" style="margin-top:0">
-      <button class="btn" data-act="s-export">Скачать JSON</button>
-      <button class="btn" data-act="s-import">Загрузить JSON</button>
-    </div>
-    <div class="hint" style="margin-top:18px;text-align:center;color:var(--faint)">Центр задач · v2.0</div>
-  `, 'settings');
+    <div class="row" style="margin-top:0"><button class="btn" data-act="s-export">Скачать JSON</button><button class="btn" data-act="s-import">Загрузить JSON</button></div>
+    <div class="hint" style="margin-top:18px;text-align:center;color:var(--faint)">Центр задач · v3.0</div>`, 'settings');
 }
-
 async function connectCloud(){
   const url = ($('#s-url')?.value.trim() || CLOUD.url).replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
   const anon = $('#s-anon')?.value.trim() || CLOUD.anon, key = ($('#s-key') || $('#w-key')).value.trim();
-  if (!/^https?:\/\//.test(url) || !anon || !key){ toast('Введи ключ приложения', true); return; }
+  if (!/^https?:\/\//.test(url) || !anon || !key){ toast('Введите ключ приложения', true); return; }
   const c = { url, anon, key };
   toast('Проверяю подключение…');
-  try{ await rpc('tm_list', { p_done_days: 0 }, c); }
-  catch(e){ toast('Не подключилось: ' + e.message, true); return; }
-  const wasLocal = !cfg;
-  const local = Local.load();
-  cfg = c; LS.set('tc_cfg', cfg);
-  closeSheet(); await reload();
-  toast('Облако подключено ✓');
-  if (wasLocal && local.tasks.length){
-    const ok = await confirmBox(`На этом устройстве есть ${local.tasks.length} ${plural(local.tasks.length,'задача','задачи','задач')}. Перенести их в облако?`, 'Перенести');
-    if (ok) await migrate(local);
-  }
+  try { await rpc('tm_list', { p_done_days: 0 }, c); } catch (e){ toast('Не подключилось: ' + e.message, true); return; }
+  const wasLocal = !cfg, local = Local.load();
+  cfg = c; LS.set('tc_cfg', cfg); closeSheet(); await reload(); toast('Облако подключено ✓');
+  if (wasLocal && local.tasks.length && await confirmBox(`На этом устройстве ${local.tasks.length} ${plural(local.tasks.length, 'запись', 'записи', 'записей')}. Перенести в облако?`, 'Перенести')) importData(local);
 }
-function byDepth(list, key){
-  const ids = new Map(list.map(x => [x.id, x])); const d = x => { let n = 0, p = x; while (p && p[key] && ids.has(p[key]) && n < 30){ p = ids.get(p[key]); n++; } return n; };
-  return list.slice().sort((a, b) => d(a) - d(b));
-}
-async function migrate(src){
-  toast('Переношу…');
-  try{
-    const amap = {}, tmap = {};
-    for (const a of byDepth(src.areas, 'parent_id')){
-      const par = a.parent_id ? (amap[a.parent_id] || null) : null;
-      const same = S.areas.find(x => x.name.toLowerCase() === String(a.name).toLowerCase() && (x.parent_id||null) === par);
-      if (same){ amap[a.id] = same.id; continue; }
-      const n = await Cloud.addArea({ ...a, parent_id: par }); amap[a.id] = n.id; S.areas.push(n);
-    }
-    let n = 0;
-    for (const t of byDepth(src.tasks, 'parent_id')){
-      const r = await Cloud.addTask({ ...t, area_id: t.area_id ? (amap[t.area_id] || null) : null, parent_id: t.parent_id ? (tmap[t.parent_id] || null) : null });
-      tmap[t.id] = r.id; n++;
-    }
-    await reload(true); toast(`Перенесено: ${n}`);
-    return true;
-  }catch(e){ toast('Ошибка переноса: ' + e.message, true); await reload(true); return false; }
-}
-function openWelcome(){
-  openSheet(`
-    <h2>👋 Центр задач</h2>
-    <div class="hint">Введи ключ приложения — и задачи станут общими на всех устройствах и в ChatGPT. Это нужно один раз на каждом устройстве.</div>
-    <input class="fld" id="w-key" placeholder="Ключ приложения" autocomplete="off" autocapitalize="off">
-    <div class="row">
-      <button class="btn" data-act="w-skip">Пока без облака</button>
-      <button class="btn pri" data-act="s-connect">Подключить</button>
-    </div>`, 'welcome');
-}
-async function shareLink(){
-  const link = location.origin + location.pathname + '#key=' + cfg.key;
-  if (navigator.share){ try{ await navigator.share({ title: 'Центр задач', text: 'Подключение Центра задач', url: link }); return; }catch(e){ if (e.name === 'AbortError') return; } }
-  copyText(link);
+function byDepth(list){ const ids = new Map(list.map(x => [x.id, x])); const d = x => { let n = 0, p = x; while (p && p.parent_id && ids.has(p.parent_id) && n < 30){ p = ids.get(p.parent_id); n++; } return n; }; return list.slice().sort((a, b) => d(a) - d(b)); }
+function importData(src){
+  // id сохраняются — повторный импорт того же файла не создаёт дублей
+  let n = 0;
+  for (const a of byDepth(src.areas || [])) if (!areaOf(a.id)) commit({ type: 'addArea', area: { id: a.id, name: a.name, emoji: a.emoji, color: a.color, parent_id: a.parent_id || null } });
+  for (const t of byDepth(src.tasks || [])) if (!taskOf(t.id)){ const { area, path, ...task } = t; commit({ type: 'addTask', task }); n++; }
+  toast(n ? `Добавлено записей: ${n}` : 'Новых записей нет');
 }
 async function disconnect(){
-  if (!await confirmBox('Отключить облако? Задачи в облаке останутся, приложение вернётся к локальным данным этого устройства.', 'Отключить')) return;
-  cfg = null; LS.del('tc_cfg'); LS.del('tc_cache'); closeSheet(); await reload();
+  if (!await confirmBox(outbox.length ? `Есть неотправленные изменения (${outbox.length}) — при отключении они пропадут. Отключить?` : 'Отключить облако? Задачи в облаке останутся.', 'Отключить')) return;
+  cfg = null; outbox = []; saveOutbox(); LS.del('tc_cfg'); LS.del('tc_cache'); closeSheet(); await reload();
 }
-
 function exportJson(){
-  const data = JSON.stringify({ app: 'task-center', exported: new Date().toISOString(), areas: S.areas, tasks: S.tasks }, null, 2);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
-  a.download = `tasks-${today()}.json`; a.click();
+  const data = JSON.stringify({ app: 'task-center', version: 3, exported: new Date().toISOString(), areas: S.areas, tasks: S.tasks }, null, 2);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' })); a.download = `tasks-${today()}.json`; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 async function importJson(file){
-  try{
-    const d = JSON.parse(await file.text());
-    if (!Array.isArray(d.tasks) || !Array.isArray(d.areas)) throw new Error('не тот формат');
-    if (!await confirmBox(`Добавить ${d.tasks.length} ${plural(d.tasks.length,'задачу','задачи','задач')} из файла к текущим?`, 'Добавить')) return;
-    if (cfg){ closeSheet(); await migrate(d); }
-    else{
-      const db = Local.load(); const map = {}, tmap = {};
-      for (const a of byDepth(d.areas, 'parent_id')){
-        const par = a.parent_id ? (map[a.parent_id] || null) : null;
-        const same = db.areas.find(x => x.name.toLowerCase() === String(a.name).toLowerCase() && (x.parent_id||null) === par);
-        if (same){ map[a.id] = same.id; continue; }
-        const id = uid(); db.areas.push({ ...a, id, parent_id: par }); map[a.id] = id;
-      }
-      for (const t of byDepth(d.tasks, 'parent_id')){ const id = uid(); tmap[t.id] = id;
-        db.tasks.push({ ...t, id, area_id: t.area_id ? (map[t.area_id] || null) : null, parent_id: t.parent_id ? (tmap[t.parent_id] || null) : null }); }
-      Local.save(db); closeSheet(); await reload(); toast('Импортировано');
-    }
-  }catch(e){ toast('Не удалось прочитать файл: ' + e.message, true); }
+  try { const d = JSON.parse(await file.text()); if (!Array.isArray(d.tasks) || !Array.isArray(d.areas)) throw new Error('не тот формат');
+    if (await confirmBox(`Добавить из файла записи, которых ещё нет (в файле ${d.tasks.length})?`, 'Добавить')){ closeSheet(); importData(d); } }
+  catch (e){ toast('Не удалось прочитать файл: ' + e.message, true); }
+}
+function openWelcome(){
+  openSheet(`<h2>👋 Центр задач</h2><div class="hint">Введите ключ приложения — и задачи станут общими на всех устройствах и в ChatGPT. Это нужно один раз на каждом устройстве.</div>
+    <input class="fld" id="w-key" placeholder="Ключ приложения" autocomplete="off" autocapitalize="off">
+    <div class="row"><button class="btn" data-act="w-skip">Пока без облака</button><button class="btn pri" data-act="s-connect">Подключить</button></div>`, 'welcome');
+}
+async function shareLink(){
+  const link = location.origin + location.pathname + '#key=' + cfg.key;
+  if (navigator.share){ try { await navigator.share({ title: 'Центр задач', url: link }); return; } catch (e){ if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(link); toast('Ссылка скопирована'); } catch { toast('Не удалось скопировать', true); }
 }
 
-// ================= ChatGPT setup =================
-function gptSchema(){
-  const KEY = { type: 'string', enum: [cfg.key], description: 'Ключ приложения. Всегда передавай ровно это значение.' };
-  const ok = { '200': { description: 'OK', content: { 'application/json': { schema: { type: 'object' } } } } };
-  const op = (id, summary, props, req, consequential = false) => ({ post: {
-    operationId: id, summary, 'x-openai-isConsequential': consequential,
-    requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', required: ['p_key', ...req], properties: { p_key: KEY, ...props } } } } },
-    responses: ok } });
-  const area = { type: 'string', description: 'Полка: путь через / (например "EV77 / Авито"), название или id. Не указывай — задача попадёт во «Входящие» (у подзадачи — на полку родителя).' };
-  const parent = { type: 'string', format: 'uuid', description: 'id родительской задачи — тогда это подзадача' };
-  const parentArea = { type: 'string', description: 'Родительская полка: путь, название или id. Пусто — верхний уровень.' };
-  const prio = { type: 'integer', enum: [1,2,3], description: '1 — высокий/срочно, 2 — обычный, 3 — низкий' };
-  const due = { type: 'string', format: 'date', description: 'Срок в формате ГГГГ-ММ-ДД' };
-  const status = { type: 'string', enum: ['todo','doing','waiting','done'], description: 'todo — сделать, doing — в работе, waiting — ждёт кого-то, done — готово' };
-  return {
-    openapi: '3.1.0',
-    info: { title: 'Центр задач', version: '1.0.0', description: 'Личный центр задач: полки (направления) и задачи.' },
-    servers: [{ url: cfg.url + '/rest/v1' }],
-    paths: {
-      '/rpc/tm_list': op('listTasks', 'Все полки и задачи (открытые + выполненные за p_done_days дней) и сегодняшняя дата today (Москва)',
-        { p_done_days: { type: 'integer', default: 7 } }, []),
-      '/rpc/tm_add_task': op('addTask', 'Добавить задачу',
-        { p_title: { type: 'string' }, p_notes: { type: 'string' }, p_area: area, p_priority: prio, p_due: due, p_status: status, p_parent: parent }, ['p_title']),
-      '/rpc/tm_update_task': op('updateTask', 'Изменить задачу. Передавай только то, что меняется.',
-        { p_id: { type: 'string', format: 'uuid' }, p_title: { type: 'string' }, p_notes: { type: 'string' }, p_area: area, p_priority: prio, p_due: due, p_status: status,
-          p_clear_due: { type: 'boolean', description: 'true — убрать срок' }, p_clear_area: { type: 'boolean', description: 'true — переложить во «Входящие»' },
-          p_parent: { ...parent, description: 'Сделать подзадачей этой задачи' }, p_clear_parent: { type: 'boolean', description: 'true — вынести на верхний уровень' } }, ['p_id']),
-      '/rpc/tm_delete_task': op('deleteTask', 'Удалить задачу навсегда', { p_id: { type: 'string', format: 'uuid' } }, ['p_id'], true),
-      '/rpc/tm_add_area': op('addArea', 'Создать полку (в т.ч. внутри другой полки через p_parent)', { p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string', description: 'HEX цвет, например #6c8cff' }, p_parent: parentArea }, ['p_name']),
-      '/rpc/tm_update_area': op('updateArea', 'Переименовать, изменить или переместить полку', { p_id: { type: 'string', format: 'uuid' }, p_name: { type: 'string' }, p_emoji: { type: 'string' }, p_color: { type: 'string' }, p_sort: { type: 'integer' }, p_parent: parentArea, p_clear_parent: { type: 'boolean', description: 'true — сделать полкой верхнего уровня' } }, ['p_id']),
-      '/rpc/tm_delete_area': op('deleteArea', 'Удалить полку (её задачи и подполки переедут уровнем выше)', { p_id: { type: 'string', format: 'uuid' } }, ['p_id'], true)
-    }
-  };
-}
-const GPT_INSTRUCTIONS = `Ты — помощник по личному Центру задач Дениса. Отвечай по-русски, коротко и по делу.
-
-Как работать с задачами:
-- Перед любым ответом о задачах или изменением сначала вызови listTasks — так ты узнаешь актуальные id, полки и сегодняшнюю дату (поле today, время московское).
-- Даты передавай в формате ГГГГ-ММ-ДД. «Завтра», «в пятницу», «через неделю» считай от today.
-- Полки бывают вложенными (у каждой полки в listTasks есть path, например "EV77 / Авито"). В p_area передавай path. Если непонятно, куда положить, — не указывай полку: задача попадёт во «Входящие».
-- Подзадачи: у задачи есть parent_id. Чтобы добавить подзадачу — addTask с p_parent = id родителя (полку можно не указывать, возьмётся у родителя). Вложенность любая: у подзадач бывают свои подзадачи.
-- Если я прошу «разбей задачу на шаги» — создай подзадачи.
-- Новая полка внутри другой — addArea с p_parent (путь родителя).
-- Приоритет: 1 — срочно/важно, 2 — обычный (по умолчанию), 3 — низкий.
-- Статусы: todo — сделать, doing — в работе, waiting — ждёт кого-то/чего-то, done — готово.
-- «Сделал», «закрой», «готово» → updateTask с p_status="done".
-- Убрать срок → p_clear_due=true. Переложить во «Входящие» → p_clear_area=true.
-- Если я диктую несколько задач сразу — добавь каждую отдельным вызовом addTask. Длинные детали клади в p_notes, а название делай коротким.
-- Удаляй только по прямой просьбе. Если сомневаешься — лучше отметь выполненной.
-- Если полки нет — спроси, создать ли новую (addArea).
-
-Как отвечать:
-- После изменений — одна-две строки: что сделал.
-- На «что на сегодня?», «что горит?» — покажи просроченное и задачи на сегодня, сгруппируй по полкам, срочные первыми.
-- На «разбери входящие» — предложи, на какие полки и с какими сроками разложить задачи без полки, и после моего «да» сделай.
-- На «план на неделю» — задачи на 7 дней вперёд по дням.
-- Показывая задачи, выводи подзадачи деревом с отступами и отметкой ✅ у выполненных.`;
-
-function openGpt(){
-  const schema = JSON.stringify(gptSchema(), null, 2);
-  openSheet(`
-    <h2>🤖 Подключить ChatGPT</h2>
-    <div class="hint">
-      1. ChatGPT → <b>Explore GPTs</b> → <b>Create</b> → вкладка <b>Configure</b>.<br>
-      2. Name: <code>Центр задач</code>. В <b>Instructions</b> вставь текст ниже.<br>
-      3. Внизу <b>Create new action</b> → в <b>Schema</b> вставь схему.<br>
-      4. <b>Authentication</b> → <b>API Key</b> → Auth Type <b>Custom</b> → Custom Header Name: <code>apikey</code>, API Key: твой Publishable/anon key.<br>
-      5. Сохрани GPT как <b>Only me</b> (только для меня) — в схеме твой ключ.
-    </div>
-    <div class="lbl">Instructions</div>
-    <pre class="code" id="g-ins">${esc(GPT_INSTRUCTIONS)}</pre>
-    <button class="btn" style="width:100%" data-act="copy" data-src="g-ins">Скопировать инструкцию</button>
-    <div class="lbl" style="margin-top:16px">Schema</div>
-    <pre class="code" id="g-sch">${esc(schema)}</pre>
-    <button class="btn" style="width:100%" data-act="copy" data-src="g-sch">Скопировать схему</button>
-    <div class="lbl" style="margin-top:16px">API Key (для Authentication)</div>
-    <pre class="code" id="g-key">${esc(cfg.anon)}</pre>
-    <button class="btn" style="width:100%" data-act="copy" data-src="g-key">Скопировать ключ</button>
-    <div class="row"><button class="btn" data-act="settings">← Назад</button></div>
-  `, 'gpt');
-}
-async function copyText(text){
-  try{ await navigator.clipboard.writeText(text); }
-  catch{ const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch{} ta.remove(); }
-  toast('Скопировано');
-}
-
-// ================= events =================
+// ================= события =================
 document.addEventListener('click', async e => {
   const el = e.target.closest('[data-act]'); if (!el) return;
   const a = el.dataset.act, v = el.dataset.v;
-  const tid = el.closest('.task')?.dataset.id;
+  const tid = el.closest('[data-id]')?.dataset.id;
+  const mv = sheetMode && sheetMode.startsWith('move:') ? sheetMode.slice(5) : null;
   switch (a){
     case 'go': go(v); break;
     case 'open-area': S.areaId = v; go('area'); break;
-    case 'expand': { if (S.expanded.has(tid)) S.expanded.delete(tid); else S.expanded.add(tid); LS.set('tc_exp', [...S.expanded]); render(); break; }
+    case 'inbox': S.f = { q: '', area: 'inbox', status: 'open', prio: '', due: '' }; go('list'); break;
+    case 'refresh': if (outbox.length) flush(); else reload(); break;
+    case 'retry': flush(); break;
+    case 'settings': openSettings(); break;
+    case 'close': closeSheet(); break;
+    case 'tg': S.open[el.dataset.k] = !S.open[el.dataset.k]; render(); break;
+    case 'more': S.listLimit += 60; render(); break;
+    case 'wk': S.weekOff = v === '0' ? 0 : S.weekOff + Number(v); render(); break;
+    case 'freset': S.f = { q: '', area: '', status: 'open', prio: '', due: '' }; render(); break;
+    case 'expand': { S.expanded.has(tid) ? S.expanded.delete(tid) : S.expanded.add(tid); LS.set('tc_exp', [...S.expanded]); render(); break; }
+    case 'edit': { const t = taskOf(tid); if (t) openEditor(t); break; }
+    case 'new': {
+      const d = {};
+      if (S.view === 'today') d.plan_date = today();
+      if (S.view === 'area') d.area_id = S.areaId;
+      if (S.view === 'list' && S.f.area && S.f.area !== 'inbox') d.area_id = S.f.area;
+      openEditor(null, d); break;
+    }
+    case 'start': upd(tid, { status: 'doing' }, 'Задача в работе'); break;
+    case 'pause': upd(tid, { status: 'todo' }, 'Поставлено на паузу'); break;
+    case 'finish': finishTask(tid); break;
+    case 'wait': openWaitSheet(tid); break;
+    case 'unwait': upd(tid, { status: 'doing' }, 'Задача снова в работе'); break;
+    case 'move': openMoveMenu(tid); break;
+    case 'm-day': moveTo(mv, v); break;
+    case 'm-slot': if (setSlot(mv, today(), v)) closeSheet(); break;
+    case 'm-edit': { closeSheet(); const t = taskOf(mv); if (t) setTimeout(() => openEditor(t), 260); break; }
+    case 'pick': openPicker(v); break;
+    case 'pk': pickTask(v); break;
+    case 'w-d': waitDate = v; $('#w-picks').innerHTML = waitPicks(); bindWaitDate(); break;
+    case 'w-save': saveWait(v); break;
+    case 'ed-status': syncEd(); ed.status = v; redrawEditor(); break;
+    case 'ed-prio': syncEd(); ed.priority = Number(v); redrawEditor(); break;
+    case 'ed-date': syncEd(); ed[el.dataset.f] = v || null; redrawEditor(); break;
+    case 'ed-save': saveEditor(); break;
+    case 'ed-open': editorOpen(v); break;
+    case 'ed-sub-toggle': { syncEd(); await finishTask(v); redrawEditor(); break; }
+    case 'ed-del': { const id = ed._id, nd = descOf(id).length;
+      if (await confirmBox(`Удалить задачу${nd ? ` и ${nd} ${plural(nd, 'подзадачу', 'подзадачи', 'подзадач')}` : ''} навсегда?`)){ closeSheet(); commit({ type: 'deleteTask', id }, 'Удалено'); } break; }
+    case 'new-area': openAreaEditor(null, v || null); break;
     case 'edit-area': { const ar = areaOf(v); if (ar) openAreaEditor(ar); break; }
     case 'ae-save': saveArea(v); break;
     case 'ae-del': deleteArea(v); break;
-    case 'ed-open': editorOpen(v); break;
-    case 'ed-sub-toggle': { syncEd(); toggleDone(v); setTimeout(drawEditorKeep, 0); break; }
-    case 'toggle': toggleDone(tid); break;
-    case 'edit': { if (e.target.closest('[data-act="expand"]')) break; const t = S.tasks.find(x => x.id === tid); if (t) openEditor(t); break; }
-    case 'new': {
-      const d = {};
-      if (S.view === 'today') d.due = today();
-      if (S.view === 'area') d.area_id = S.areaId;
-      openEditor(null, d); break;
-    }
-    case 'refresh': reload(); break;
-    case 'settings': openSettings(); break;
-    case 'close': closeSheet(); break;
-    case 'show-done': S.showDone[el.dataset.k] = !S.showDone[el.dataset.k]; render(); break;
-    case 'new-area': openAreaEditor(null, v || null); break;
-    // editor
-    case 'ed-due': syncEd(); ed.due = v || null; drawEditorKeep(); break;
-    case 'ed-prio': syncEd(); ed.priority = Number(v); drawEditorKeep(); break;
-    case 'ed-status': syncEd(); ed.status = v; drawEditorKeep(); break;
-    case 'ed-save': saveEditor(); break;
-    case 'ed-del': { const id = ed._id; const nd = taskDesc(id).length; if (await confirmBox(`Удалить задачу${nd ? ` и ${nd} ${plural(nd,'подзадачу','подзадачи','подзадач')}` : ''} навсегда?`)){ closeSheet(); removeTask(id); } break; }
-    // settings
     case 's-connect': connectCloud(); break;
     case 's-disconnect': disconnect(); break;
-    case 's-gpt': openGpt(); break;
     case 's-link': shareLink(); break;
-    case 'w-skip': LS.set('tc_skip_cloud', true); closeSheet(); break;
     case 's-export': exportJson(); break;
     case 's-import': $('#file-in').click(); break;
-    case 'copy': copyText($('#' + el.dataset.src).textContent); break;
+    case 'w-skip': LS.set('tc_skip_cloud', true); closeSheet(); break;
   }
 });
-document.addEventListener('submit', e => {
-  if (e.target.closest('[data-form="sub"]')){ e.preventDefault(); editorAddSub(); return; }
-  const f = e.target.closest('[data-form="quick"]'); if (!f) return;
-  e.preventDefault();
-  const inp = f.querySelector('input'); const title = inp.value.trim(); if (!title) return;
-  const t = { title };
-  if (S.view === 'area') t.area_id = S.areaId;
-  if (title.endsWith('!')){ t.title = title.replace(/!+$/, '').trim(); t.priority = 1; }
-  inp.value = '';
-  createTask(t).then(() => { const i = document.querySelector('.quick input'); if (i) i.focus(); });
+document.addEventListener('submit', e => { if (e.target.closest('[data-form="sub"]')){ e.preventDefault(); editorAddSub(); } });
+document.addEventListener('input', e => { if (e.target.id === 'search'){ S.f.q = e.target.value; S.listLimit = 60; render(); } });
+document.addEventListener('change', e => {
+  const m = { 'f-area': 'area', 'f-status': 'status', 'f-prio': 'prio', 'f-due': 'due' }[e.target.id];
+  if (m){ S.f[m] = e.target.value; S.listLimit = 60; render(); }
 });
-document.addEventListener('input', e => { if (e.target.id === 'search'){ S.q = e.target.value; render(); } });
-$('#backdrop').addEventListener('click', closeSheet);
+$('#backdrop').addEventListener('click', () => { if (sheetMode !== 'editor') closeSheet(); else confirmBox('Закрыть без сохранения?', 'Закрыть').then(ok => { if (ok) closeSheet(); }); });
 $('#file-in').addEventListener('change', e => { const f = e.target.files[0]; if (f) importJson(f); e.target.value = ''; });
-document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if ($('#modal').classList.contains('show')) $('#modal').classList.remove('show'); else closeSheet(); } });
-
-// свайп вниз закрывает шторку
-(() => { let y0 = null; const s = $('#sheet-in');
-  s.addEventListener('touchstart', e => { y0 = s.scrollTop <= 0 ? e.touches[0].clientY : null; }, { passive: true });
-  s.addEventListener('touchend', e => { if (y0 != null && e.changedTouches[0].clientY - y0 > 90) closeSheet(); y0 = null; }, { passive: true });
-})();
-
-// автообновление: при возврате в приложение и раз в минуту (чтобы видеть правки ChatGPT)
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && cfg && !sheetMode) reload(true); });
-setInterval(() => { if (document.visibilityState === 'visible' && cfg && !sheetMode) reload(true); }, 60000);
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if ($('#modal').classList.contains('show')) $('#modal').querySelector('[data-i="-1"]')?.click(); else if (sheetMode !== 'editor') closeSheet(); } });
+const idle = () => document.visibilityState === 'visible' && cfg && !sheetMode && !outbox.length;
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible'){ if (outbox.length) flush(); else if (idle()) reload(true); } });
+setInterval(() => { if (idle()) reload(true); }, 60000);
 let lastDay = today();
 setInterval(() => { if (today() !== lastDay){ lastDay = today(); render(); } }, 30000);
 
-// ================= start =================
-if (cfg){ const c = LS.get('tc_cache', null); if (c){ S.areas = c.areas || []; S.tasks = c.tasks || []; } }
-render();
-reload(true);
-if (!cfg && !LS.get('tc_skip_cloud', false)) setTimeout(openWelcome, 300);
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+// ================= старт =================
+(() => {
+  S.view = 'today';   // стартовый экран — всегда «Сегодня»
+  if (cfg){ const c = LS.get('tc_cache', null); if (c){ S.areas = c.areas || []; S.tasks = c.tasks || []; S.loaded = true; for (const it of outbox) applyOp(S, JSON.parse(JSON.stringify(it.op))); } }
+  render();
+  reload(true).then(() => flush());
+  if (!cfg && !LS.get('tc_skip_cloud', false)) setTimeout(openWelcome, 300);
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
 </script>
 </body>
 </html>
