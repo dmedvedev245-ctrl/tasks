@@ -1,120 +1,127 @@
-// Центр задач v5 — сценарий адаптации существующих задач к проектам и этапам.
-// Ничего не удаляет и не меняет у задач, кроме полей маршрута (project_id, stage_id, track).
-// Статусы, сроки, дни работы, подзадачи, заметки и id остаются прежними. Идентификаторы проектов и этапов постоянные —
-// повторный запуск не создаёт дублей. plan() только вычисляет операции и отчёт; применяет их приложение.
+// Центр задач v5 — адаптация существующих задач к проектам и этапам (сценарий для пробного прогона и выпуска).
+// plan() только вычисляет: маршрут для каждой задачи по отдельности (без каскада), проекты и этапы, отчёт до/после.
+// Применение на сервере — tm_migrate_v5: ставит маршрут только задачам без маршрута, не изменённым после снимка;
+// статусы, сроки, заметки, подзадачи, id и updated_at не меняются. Новые задачи не создаются.
 window.MIGRATE_V5 = (() => {
   const ID = n => 'e7700000-0000-4000-8000-' + String(n).padStart(12, '0');
-  const norm = s => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[«»"]/g, '').replace(/\s+/g, ' ').trim();
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const norm = s => String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[«»"]/g, '').replace(/\s+/g, ' ').trim();
   const MAIN = {
     id: ID(1), area: 'EV77 / Мини-апп', title: 'Переход на работу через мини-приложение',
     goal: 'Перевести работу EV77 на мини-приложение',
     result: 'Брони, выдачи, возвраты, договоры и расчёты ведутся через мини-приложение; выбран основной источник учёта, проверены роли и уведомления, отправка старой очереди исключена',
     stages: [
-      { id: ID(11), title: 'Финансовый модуль', status: 'done', done_criteria: 'Финансовый модуль установлен и проверен', tasks: ['Довести раздел «Финансы» до учёта всей компании EV77'] },
-      { id: ID(12), title: 'Связка amoCRM и мини-приложения', status: 'current', done_criteria: null, notes: 'Рабочий обмен пока выключен.',
-        tasks: ['Подключить поиск клиента из мини-приложения', 'Синхронизировать брони и этапы аренды'], next: 'Подключить поиск клиента из мини-приложения' },
-      { id: ID(13), title: 'Приёмочные проверки', status: 'todo', done_criteria: 'Проверены бронь, выдача, возврат, договор, расчёты, права и отсутствие дублей', tasks: [] },
-      { id: ID(14), title: 'Реальный пилот с водителем', status: 'todo', done_criteria: 'Пилот с водителем проведён, найденные проблемы устранены', tasks: ['Провести реальный цикл с водителем'] },
-      { id: ID(15), title: 'Полный переход', status: 'todo', done_criteria: 'Выбран основной источник учёта, проверены роли и уведомления, исключена отправка старой очереди', tasks: ['Подключить уведомления сотрудникам и группе'] }
-    ],
-    queue: ['Довести поиск, фильтры и журнал', 'Продумать статусы и категории клиентов']
+      { id: ID(11), title: 'Финансовый модуль', status: 'done', done_criteria: 'Финансовый модуль установлен и проверен',
+        tasks: ['afa673ca-32fd-4de8-a4e3-05203183bf12'] },
+      { id: ID(12), title: 'Связка amoCRM и мини-приложения', status: 'current',
+        done_criteria: 'Согласованная аренда связана с правильной сделкой; даты и события передаются корректно; нет дублей и непредусмотренных действий. Финальное закрытие сделки остаётся ручным.',
+        notes: 'Технический пакет CRM установлен, точный вариант Model 3 добавлен. Рабочий обмен выключен и на реальной сделке ещё не проверен — тесты кода не считаются завершением. Следующий шаг: контролируемая проверка на реальной сделке и пилот.',
+        tasks: ['b3a57e17-9aa8-4ef9-b72a-32bcb0868526', '335e15cd-82e2-4a59-8393-caa4f35cc3d8'], next: 'b3a57e17-9aa8-4ef9-b72a-32bcb0868526' },
+      { id: ID(13), title: 'Приёмочные проверки', status: 'todo',
+        done_criteria: 'Проверены бронь (в том числе с телефона), выдача, возврат, договор, расчёты, права и отсутствие дублей',
+        notes: 'Проверка брони с телефона отложена до приёмки перед запуском и не блокирует техническую подготовку CRM.',
+        tasks: ['8de8ac09-6243-457a-add1-15bcfc1f7703'] },
+      { id: ID(14), title: 'Реальный пилот с водителем', status: 'todo', done_criteria: 'Пилот с водителем проведён, найденные проблемы устранены',
+        tasks: ['77850981-3231-4b82-85c9-0caa592df04a'] },
+      { id: ID(15), title: 'Полный переход', status: 'todo', done_criteria: 'Выбран основной источник учёта, проверены роли и уведомления, исключена отправка старой очереди',
+        tasks: ['142abf09-aaa9-42a1-b882-20a9e367af89'] }
+    ]
   };
-  const COMMIT = ['Собрать договоры и фото для возврата залогов и разбора штрафов'];
+  // Обязательства перед клиентами — вместе со всеми подзадачами (разбор штрафов прошлых арендаторов, сверка Данилы Котова)
+  const COMMIT = ['54fae7c3-8940-4489-b6cd-d4137c7050ab'];
+  // Начатая правка сайта — существующая задача, новая не создаётся
+  const SITE = { stage: ID(201), stageTitle: 'Оформление мобильного первого экрана', task: '618ae72f-a738-4109-9554-2b9a5fa3281b' };
   const ORDER = { 'Сайт': 10, 'Авито': 20, 'Телефония': 30, 'Отчётность': 40 };
-  const SITE = { stage: ID(201), task: ID(301), stageTitle: 'Мобильный первый экран', taskTitle: 'Доработать мобильный первый экран сайта' };
-  const NOTE_FIT = { 'Связаться с Екатериной по amoCRM': 'возможно, относится к этапу «Связка amoCRM и мини-приложения» — оставлено в очереди CRM, решите сами' };
+  const NOTES = { '00102219-9641-4ea9-8477-376937234bb3': 'возможно, относится к этапу «Связка amoCRM и мини-приложения» — оставлено в очереди CRM' };
+  const KEEP = ['title', 'notes', 'status', 'priority', 'due', 'plan_date', 'plan_order', 'parent_id', 'area_id', 'done_at', 'created_at', 'updated_at',
+    'next_step', 'done_criteria', 'wait_for', 'unblock_action', 'check_date', 'rental_id', 'template_step'];
 
   function plan(data, applyOp){
-    const st = JSON.parse(JSON.stringify({ areas: data.areas || [], tasks: data.tasks || [], projects: data.projects || [], stages: data.stages || [], rentals: [] }));
-    const T0 = JSON.parse(JSON.stringify(st.tasks));
-    const ops = [], missing = [], used = new Set();
-    const byId = new Map(st.tasks.map(t => [t.id, t]));
+    const T0 = JSON.parse(JSON.stringify(data.tasks || []));
+    const byId = new Map(T0.map(t => [t.id, t]));
+    const kids = new Map(); T0.forEach(t => { if (t.parent_id && byId.has(t.parent_id)){ if (!kids.has(t.parent_id)) kids.set(t.parent_id, []); kids.get(t.parent_id).push(t); } });
+    const tree = id => { const out = [id]; (kids.get(id) || []).forEach(k => out.push(...tree(k.id))); return out; };
     const isTop = t => !t.parent_id || !byId.has(t.parent_id);
-    const areaByPath = p => st.areas.find(a => (a.path || a.name) === p);
-    const pathOf = id => { const a = st.areas.find(x => x.id === id); return a ? (a.path || a.name) : ''; };
-    const find = (title, areaPath) => {
-      const c = st.tasks.filter(t => isTop(t) && norm(t.title) === norm(title));
-      const pick = c.find(t => !areaPath || pathOf(t.area_id) === areaPath) || c[0];
-      if (!pick){ missing.push(title); return null; }
-      if (c.length > 1) missing.push(title + ' (найдено ' + c.length + ', взята первая)');
-      return pick;
+    const pathOf = id => { const a = (data.areas || []).find(x => x.id === id); return a ? (a.path || a.name) : ''; };
+    const legacy = t => !t.project_id && !t.stage_id && !t.track;
+    const missing = [];
+    const route = new Map();   // id -> {project_id, stage_id, track, stage_ord}
+    const assign = (rootId, r, ord) => {
+      if (!byId.has(rootId)){ missing.push(rootId); return; }
+      tree(rootId).forEach((id, i) => route.set(id, { project_id: r.project_id || null, stage_id: r.stage_id || null, track: r.track, stage_ord: i === 0 && ord ? ord : null }));
     };
-    const route = (t, patch) => { used.add(t.id); ops.push({ type: 'routeTask', id: t.id, patch }); };
-
-    // 1. Главный проект и его этапы
-    const ma = areaByPath(MAIN.area);
-    ops.push({ type: 'saveProject', id: MAIN.id, patch: { title: MAIN.title, goal: MAIN.goal, result: MAIN.result, area_id: ma ? ma.id : null, status: 'active', sort: 1, needs_review: false, owner: null, notes: '' } });
-    ops.push({ type: 'setMainProject', id: MAIN.id });
+    const projects = [], stages = [], next = [];
+    // 1. направления EV77 — в очереди; открытое — очередь проекта, выполненное — история
+    const ev = (data.areas || []).find(a => (a.path || a.name) === 'EV77');
+    (data.areas || []).filter(a => ev && a.parent_id === ev.id).forEach((a, i) => {
+      const tops = T0.filter(t => isTop(t) && t.area_id === a.id);
+      if (!tops.length) return;
+      const main = (a.path || a.name) === MAIN.area, pid = main ? MAIN.id : ID(100 + i);
+      if (!main) projects.push({ id: pid, title: a.name, goal: null, result: null, area_id: a.id, status: 'queue', sort: ORDER[a.name] || 100, owner: null, notes: '', needs_review: true });
+      tops.forEach(t => assign(t.id, { project_id: pid, track: t.status === 'done' ? 'project' : 'queue' }));
+      if (a.name === 'Сайт'){
+        stages.push({ id: SITE.stage, project_id: pid, ord: 1, title: SITE.stageTitle, done_criteria: null, status: 'current', depends_on: [], notes: 'Начатая работа — можно завершить. Новые улучшения сайта — в очередь.' });
+        assign(SITE.task, { project_id: pid, stage_id: SITE.stage, track: 'project' }, 1);
+        next.push({ stage_id: SITE.stage, task_id: SITE.task });
+      }
+    });
+    // 2. главный проект и его этапы
+    const ma = (data.areas || []).find(a => (a.path || a.name) === MAIN.area);
+    projects.unshift({ id: MAIN.id, title: MAIN.title, goal: MAIN.goal, result: MAIN.result, area_id: ma ? ma.id : null, status: 'active', sort: 1, owner: null, notes: '', needs_review: false });
     let prev = null;
     MAIN.stages.forEach((s, i) => {
-      ops.push({ type: 'saveStage', id: s.id, project_id: MAIN.id, patch: { title: s.title, ord: i + 1, done_criteria: s.done_criteria, depends_on: prev ? [prev] : [], notes: s.notes || '' } });
-      if (s.status !== 'todo') ops.push({ type: 'setStageStatus', id: s.id, status: s.status });
+      stages.push({ id: s.id, project_id: MAIN.id, ord: i + 1, title: s.title, done_criteria: s.done_criteria, status: s.status, depends_on: prev ? [prev] : [], notes: s.notes || '' });
+      s.tasks.forEach((id, k) => assign(id, { project_id: MAIN.id, stage_id: s.id, track: 'project' }, k + 1));
+      if (s.next) next.push({ stage_id: s.id, task_id: s.next });
       prev = s.id;
     });
-    const nextOps = [];
-    MAIN.stages.forEach(s => {
-      s.tasks.forEach((title, k) => { const t = find(title); if (t) route(t, { project_id: MAIN.id, stage_id: s.id, track: 'project', stage_ord: k + 1 }); });
-      if (s.next){ const t = find(s.next); if (t) nextOps.push({ type: 'saveStage', id: s.id, project_id: MAIN.id, patch: { next_task_id: t.id } }); }
-    });
-    MAIN.queue.forEach(title => { const t = find(title); if (t) route(t, { project_id: MAIN.id, track: 'queue' }); });
-    // выполненные задачи мини-приложения — история главного проекта
-    st.tasks.filter(t => isTop(t) && !used.has(t.id) && pathOf(t.area_id) === MAIN.area).forEach(t =>
-      route(t, { project_id: MAIN.id, track: t.status === 'done' ? 'project' : 'queue' }));
+    // 3. обязательства — последними, чтобы подзадачи сохранили принадлежность
+    COMMIT.forEach(id => assign(id, { track: 'commitment' }));
 
-    // 2. Обязательства перед клиентами
-    COMMIT.forEach(title => { const t = find(title); if (t) route(t, { track: 'commitment' }); });
+    const routes = [], already = [];
+    for (const [id, r] of route){ const t = byId.get(id); if (legacy(t)) routes.push({ id, ...r }); else already.push(t.title); }
+    const snapshot = T0.reduce((m, t) => (t.updated_at && t.updated_at > m ? t.updated_at : m), '');
+    const sqlPlan = { projects, stages, routes, next, main: MAIN.id };
 
-    // 3. Остальные направления EV77 — свои маршруты, требуют разбора; открытое — в очередь, выполненное — история
-    const ev = areaByPath('EV77');
-    const subAreas = st.areas.filter(a => ev && a.parent_id === ev.id && (a.path || a.name) !== MAIN.area);
-    const dirs = [];
-    subAreas.forEach((a, i) => {
-      const ts = st.tasks.filter(t => isTop(t) && !used.has(t.id) && t.area_id === a.id);
-      if (!ts.length) return;
-      const pid = ID(100 + i), name = a.name;
-      ops.push({ type: 'saveProject', id: pid, patch: { title: name, goal: null, result: null, area_id: a.id, status: 'active', sort: ORDER[name] || 100, needs_review: true, owner: null, notes: '' } });
-      dirs.push({ pid, name });
-      if (name === 'Сайт'){
-        ops.push({ type: 'saveStage', id: SITE.stage, project_id: pid, patch: { title: SITE.stageTitle, ord: 1, done_criteria: null, depends_on: [], notes: '' } });
-        ops.push({ type: 'setStageStatus', id: SITE.stage, status: 'current' });
-        if (!byId.has(SITE.task)) ops.push({ type: 'addTask', task: { id: SITE.task, title: SITE.taskTitle, notes: '', area_id: a.id, priority: 2, status: 'doing', project_id: pid, stage_id: SITE.stage, track: 'project', stage_ord: 1 } });
-      }
-      ts.forEach(t => route(t, { project_id: pid, track: isOpenT(t) ? 'queue' : 'project' }));
-    });
-    ops.push(...nextOps);
+    // операции для показа в приложении (та же логика, что tm_migrate_v5)
+    const ops = [];
+    projects.forEach(p => { const { id, ...patch } = p; ops.push({ type: 'saveProject', id, patch }); });
+    ops.push({ type: 'setMainProject', id: MAIN.id });
+    stages.forEach(s => { const { id, project_id, status, ...patch } = s; ops.push({ type: 'saveStage', id, project_id, patch }); if (status !== 'todo') ops.push({ type: 'setStageStatus', id, status }); });
+    routes.forEach(r => { const { id, ...patch } = r; ops.push({ type: 'routeTask', id, patch, with_subtasks: false, keep_updated: true }); });
+    next.forEach(n => ops.push({ type: 'saveStage', id: n.stage_id, project_id: (stages.find(s => s.id === n.stage_id) || {}).project_id, patch: { next_task_id: n.task_id } }));
 
-    // 4. Пробное применение на копии и отчёт
+    // пробное применение на копии и отчёт до/после
+    const st = JSON.parse(JSON.stringify({ areas: data.areas || [], tasks: T0, projects: data.projects || [], stages: data.stages || [], rentals: [] }));
     for (const op of ops) applyOp(st, JSON.parse(JSON.stringify(op)));
     const T1 = st.tasks, m1 = new Map(T1.map(t => [t.id, t]));
-    const KEEP = ['title', 'notes', 'status', 'priority', 'due', 'plan_date', 'plan_order', 'parent_id', 'area_id', 'done_at', 'created_at', 'next_step', 'done_criteria', 'wait_for', 'unblock_action', 'check_date', 'rental_id'];
-    const changedOther = T0.filter(t => { const x = m1.get(t.id); return !x || KEEP.some(k => JSON.stringify(t[k] ?? null) !== JSON.stringify(x[k] ?? null)); });
-    const routed = T0.filter(t => { const x = m1.get(t.id); return x && ['project_id', 'stage_id', 'track'].some(k => (t[k] || null) !== (x[k] || null)); });
+    const keepBroken = T0.filter(t => { const x = m1.get(t.id); return !x || KEEP.some(k => JSON.stringify(t[k] ?? null) !== JSON.stringify(x[k] ?? null)); });
+    const idsSame = T0.length === T1.length && T0.every(t => m1.has(t.id));
+    const cnt = (arr, f) => arr.reduce((o, t) => { const k = f(t); o[k] = (o[k] || 0) + 1; return o; }, {});
+    const subsKept = T0.filter(t => t.parent_id).every(t => (m1.get(t.id) || {}).parent_id === t.parent_id);
     const top1 = T1.filter(t => !t.parent_id || !m1.has(t.parent_id));
     const unlinked = top1.filter(t => !t.track && !t.project_id);
-    const descOpen = id => { let n = 0; const walk = p => T1.forEach(t => { if (t.parent_id === p){ if (t.status !== 'done') n++; walk(t.id); } }); walk(id); return n; };
-    const doneOpen = top1.filter(t => t.status === 'done' && descOpen(t.id));
-    const dups = dupPairs(T1.filter(t => t.status !== 'done'));
-    const byTrack = {}; T1.forEach(t => { const k = t.track || 'не разобрано'; byTrack[k] = (byTrack[k] || 0) + 1; });
-    const stagesOf = pid => st.stages.filter(s => s.project_id === pid).sort((a, b) => a.ord - b.ord);
-    const projList = st.projects.slice().sort((a, b) => (b.is_main ? 1 : 0) - (a.is_main ? 1 : 0) || (a.sort ?? 100) - (b.sort ?? 100) || a.title.localeCompare(b.title)).map(p => {
+    const commitments = T1.filter(t => t.track === 'commitment' && t.status !== 'done');
+    const projView = st.projects.slice().sort((a, b) => (b.is_main ? 1 : 0) - (a.is_main ? 1 : 0) || (a.sort ?? 100) - (b.sort ?? 100)).map(p => {
       const pt = T1.filter(t => t.project_id === p.id), ptop = pt.filter(t => !t.parent_id || !pt.some(x => x.id === t.parent_id));
-      return { title: p.title, main: p.is_main, review: p.needs_review,
-        stages: stagesOf(p.id).map(s => ({ title: s.title, status: s.status, crit: s.done_criteria, tasks: ptop.filter(t => t.stage_id === s.id).map(t => t.title), next: s.next_task_id ? (m1.get(s.next_task_id) || {}).title : null })),
-        queue: ptop.filter(t => t.track === 'queue').map(t => t.title), history: ptop.filter(t => !t.stage_id && t.track !== 'queue').length, all: pt.length };
+      return { title: p.title, main: p.is_main, status: p.status, review: p.needs_review,
+        stages: st.stages.filter(s => s.project_id === p.id).sort((a, b) => a.ord - b.ord).map(s => ({ title: s.title, status: s.status, crit: s.done_criteria, notes: s.notes,
+          tasks: ptop.filter(t => t.stage_id === s.id).map(t => ({ title: t.title, status: t.status, next: s.next_task_id === t.id })) })),
+        queue: ptop.filter(t => t.track === 'queue' && t.status !== 'done').length, history: ptop.filter(t => t.status === 'done').length, all: pt.length };
     });
-    const created = T1.length - T0.length;
     const report = {
-      before: { tasks: T0.length, open: T0.filter(isOpenT).length, projects: (data.projects || []).length, stages: (data.stages || []).length },
-      after: { tasks: T1.length, open: T1.filter(isOpenT).length, projects: st.projects.length, stages: st.stages.length },
-      created, routed: routed.length, changedOther: changedOther.map(t => t.title), byTrack, projects: projList,
-      unlinked: unlinked.map(t => [t.title, pathOf(t.area_id), t.status]), doneOpen: doneOpen.map(t => [t.title, descOpen(t.id)]),
-      dups: dups.map(([a, b, j]) => [a.title, b.title, Math.round(j * 100)]), missing, notes: Object.entries(NOTE_FIT).filter(([t]) => T1.some(x => norm(x.title) === norm(t))), ops: ops.length
+      snapshot, before: { tasks: T0.length, status: cnt(T0, t => t.status), projects: (data.projects || []).length, stages: (data.stages || []).length },
+      after: { tasks: T1.length, status: cnt(T1, t => t.status), projects: st.projects.length, stages: st.stages.length },
+      routes: routes.length, idsSame, subsKept, keepBroken: keepBroken.map(t => t.title), already, missing,
+      byTrack: cnt(T1, t => t.track || 'без маршрута'), projects: projView,
+      commitments: commitments.map(t => [t.title, t.parent_id && m1.get(t.parent_id) ? m1.get(t.parent_id).title : '', t.status]),
+      unlinked: unlinked.map(t => [t.title, pathOf(t.area_id), t.status]),
+      dups: dupPairs(T1.filter(t => t.status !== 'done')).map(([a, b, j]) => [a.title, b.title, Math.round(j * 100)]),
+      notes: Object.entries(NOTES).filter(([id]) => byId.has(id)).map(([id, n]) => [byId.get(id).title, n])
     };
     report.html = reportHtml(report);
-    return { ops, report };
+    return { ops, plan: sqlPlan, snapshot, report };
   }
-  function isOpenT(t){ return t.status !== 'done'; }
   function dupPairs(open){
     const W = open.map(t => [t, new Set(norm(t.title).replace(/[^a-zа-я0-9 ]+/g, ' ').split(' ').filter(w => w.length > 2))]), out = [];
     for (let i = 0; i < W.length; i++) for (let j = i + 1; j < W.length; j++){
@@ -127,21 +134,25 @@ window.MIGRATE_V5 = (() => {
   }
   function reportHtml(r){
     const li = a => a.length ? `<ul>${a.map(x => `<li>${x}</li>`).join('')}</ul>` : '<div class="hint">нет</div>';
-    const ST = { done: '✓ завершён', current: '▶ текущий', todo: '◻ впереди' };
-    const TR = { inbox: 'Входящие', project: 'Проект', queue: 'Очередь', commitment: 'Обязательство', ops: 'Операционка' };
+    const ST = { done: '✓ завершён', current: '▶ текущий', todo: '◻ впереди' }, PS = { active: 'главный фокус', queue: 'в очереди', paused: 'на паузе', done: 'завершён' };
+    const TS = { todo: 'не начата', doing: 'в работе', waiting: 'ждёт', done: 'готово' };
+    const stat = o => Object.entries(o).map(([k, n]) => `${TS[k] || k} ${n}`).join(', ');
+    const ok = (c, y, n) => c ? `<span style="color:var(--green)">✓ ${y}</span>` : `<b style="color:var(--red)">✕ ${n}</b>`;
     return `<div class="rep">
-      <div class="status-box">Записей задач: было ${r.before.tasks}, станет ${r.after.tasks} (+${r.created} новая — «${esc(SITE.taskTitle)}»). Открытых: ${r.before.open} → ${r.after.open}.<br>
-        Проектов: ${r.before.projects} → ${r.after.projects}, этапов: ${r.before.stages} → ${r.after.stages}. Задач с новым маршрутом: ${r.routed}.<br>
-        Изменены поля, кроме маршрута: ${r.changedOther.length ? '<b style="color:var(--red)">' + r.changedOther.length + '</b>' : 'нет — статусы, сроки, дни работы, подзадачи, заметки и id прежние'}.</div>
-      <details open><summary>Проекты и этапы</summary>${r.projects.map(p => `<div style="margin:8px 0"><b>${p.main ? '★ ' : ''}${esc(p.title)}</b>${p.review ? ' <span class="chip amber">требует разбора</span>' : ''} <span class="hint">· задач с подзадачами: ${p.all}</span>
-        ${p.stages.length ? `<ol>${p.stages.map(s => `<li>${esc(s.title)} — ${ST[s.status]}${s.crit ? '' : ' · <span class="warn">критерий не задан</span>'}${s.tasks.length ? `<br><small>${s.tasks.map(t => (t === s.next ? '➜ ' : '') + esc(t)).join('; ')}</small>` : ''}</li>`).join('')}</ol>` : '<div class="hint">этапы не составлены</div>'}
-        ${p.queue.length ? `<div class="hint" style="margin:2px 0">Очередь (${p.queue.length}): ${p.queue.slice(0, 8).map(esc).join('; ')}${p.queue.length > 8 ? '…' : ''}</div>` : ''}${p.history ? `<div class="hint" style="margin:2px 0">История (выполнено): ${p.history}</div>` : ''}</div>`).join('')}</details>
-      <details><summary>По типу маршрута (все записи)</summary>${li(Object.entries(r.byTrack).map(([k, n]) => `${esc(TR[k] || k)}: ${n}`))}</details>
-      <details><summary>Остаются без маршрута — требуют разбора (${r.unlinked.length})</summary>${li(r.unlinked.map(([t, a, s]) => `${esc(t)} <small>· ${esc(a || 'без полки')}${s === 'done' ? ' · выполнена' : ''}</small>`))}</details>
-      <details><summary>Закрыты, но есть открытые подзадачи (${r.doneOpen.length})</summary>${li(r.doneOpen.map(([t, n]) => `${esc(t)} <small>· открыто ${n}</small>`))}</details>
+      <div class="status-box">Снимок данных: ${esc(r.snapshot ? new Date(r.snapshot).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : '—')} (МСК, последнее изменение в снимке).<br>
+        Записей задач: ${r.before.tasks} → ${r.after.tasks}. Статусы до: ${stat(r.before.status)}; после: ${stat(r.after.status)}.<br>
+        Проектов: ${r.before.projects} → ${r.after.projects}, этапов: ${r.before.stages} → ${r.after.stages}. Маршрут получат: ${r.routes} задач (каждая отдельно).<br>
+        ${ok(r.idsSame, 'id те же, новых задач нет', 'набор id изменился')} · ${ok(r.subsKept, 'подзадачи на месте', 'подзадачи изменились')} ·
+        ${ok(!r.keepBroken.length, 'сроки, статусы, заметки, планы и история не меняются', 'изменятся поля: ' + r.keepBroken.length)}</div>
+      <details open><summary>Главный фокус и направления</summary>${r.projects.map(p => `<div style="margin:8px 0"><b>${p.main ? '★ ' : ''}${esc(p.title)}</b> <span class="chip ${p.main ? 'accent' : ''}">${PS[p.status] || p.status}</span>${p.review ? ' <span class="chip amber">требует разбора</span>' : ''}
+        ${p.stages.length ? `<ol>${p.stages.map(s => `<li>${esc(s.title)} — ${ST[s.status]}<br><small>${s.crit ? 'Готово, когда: ' + esc(s.crit) : '<span class="warn">критерий не задан</span>'}</small>${s.notes ? `<br><small>${esc(s.notes)}</small>` : ''}${s.tasks.length ? `<br><small>${s.tasks.map(t => (t.next ? '➜ ' : '') + esc(t.title) + ' (' + TS[t.status] + ')').join('; ')}</small>` : ''}</li>`).join('')}</ol>` : ''}
+        <div class="hint" style="margin:2px 0">${p.stages.length ? '' : 'маршрут не составлен · '}очередь: ${p.queue} · выполнено: ${p.history} · всего с подзадачами: ${p.all}</div></div>`).join('')}</details>
+      <details open><summary>Обязательства перед клиентами (${r.commitments.length})</summary>${li(r.commitments.map(([t, p, s]) => `${esc(t)} <small>· ${TS[s]}${p ? ' · ↳ ' + esc(p) : ''}</small>`))}</details>
+      <details><summary>По типу маршрута</summary>${li(Object.entries(r.byTrack).map(([k, n]) => `${esc(k)}: ${n}`))}</details>
+      <details><summary>Остаются без маршрута — требуют разбора (${r.unlinked.length})</summary>${li(r.unlinked.map(([t, a, s]) => `${esc(t)} <small>· ${esc(a || 'без полки')} · ${TS[s]}</small>`))}</details>
       <details><summary>Возможные дубли — только кандидаты (${r.dups.length})</summary>${li(r.dups.map(([a, b, j]) => `${esc(a)} ⇄ ${esc(b)} <small>· ${j}%</small>`))}</details>
-      <details><summary>Требуют решения</summary>${li(r.notes.map(([t, n]) => `${esc(t)} — ${esc(n)}`).concat(r.missing.map(m => 'Не найдена задача по правилу: ' + esc(m))))}</details>
-      <div class="hint">Операций: ${r.ops}. Удалений нет. Объединений нет.</div></div>`;
+      <details><summary>Требуют решения</summary>${li(r.notes.map(([t, n]) => `${esc(t)} — ${esc(n)}`).concat(r.missing.map(m => 'Не найдена задача: ' + esc(m)), r.already.length ? ['Уже имеют маршрут (не трогаются): ' + r.already.length] : []))}</details>
+      <div class="hint">При выпуске маршрут ставится только задачам без маршрута, не изменённым после снимка; остальные вернутся списком «пропущено». Удалений и объединений нет.</div></div>`;
   }
   return { plan };
 })();

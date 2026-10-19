@@ -414,7 +414,7 @@ const customKey = title => 'custom:' + String(title).trim().toLowerCase().replac
 // v5: маршрут задачи — отдельные поля, статусы не меняются
 const TRACK = { inbox: 'Входящие', project: 'Проект', queue: 'Очередь', commitment: 'Обязательство', ops: 'Операционка' };
 const TRACK_IC = { inbox: '📥', project: '🧭', queue: '🗂', commitment: '🤝', ops: '⚙' };
-const PSTATUS = { active: 'Активен', paused: 'На паузе', done: 'Завершён' };
+const PSTATUS = { active: 'Главный фокус', queue: 'В очереди', paused: 'На паузе', done: 'Завершён' };
 const ROUTE_KEYS = ['project_id', 'stage_id', 'track', 'stage_ord', 'wait_from', 'depends_on'];
 
 // Оформление: как в системе / светлая / тёмная
@@ -498,7 +498,9 @@ function stageInfo(s){
   }
   let alts = [];
   if (blocked){
-    alts = avail.filter(t => !step || t.id !== step.id).slice(0, 3).map(t => ({ t, where: 'в этом этапе' }));
+    // подзадачи заблокированного шага — не альтернатива: они ждут вместе с ним
+    const under = new Set(step ? [step.id, ...descOf(step.id).map(x => x.id)] : []);
+    alts = tops(avail.filter(t => !under.has(t.id))).slice(0, 3).map(t => ({ t, where: 'в этом этапе' + (t.parent_id && taskOf(t.parent_id) ? ' · ↳ ' + trunc(taskOf(t.parent_id).title, 40) : '') }));
     if (alts.length < 3) alts.push(...sortTasks(tops(S.tasks.filter(t => t.project_id === s.project_id && t.track === 'queue' && isOpen(t) && t.status !== 'waiting')))
       .slice(0, 3 - alts.length).map(t => ({ t, where: 'из очереди проекта' })));
   }
@@ -590,7 +592,8 @@ function applyOp(st, op){
         created_at: now, ...op.patch, id: op.id, updated_at: now }); return; }
       Object.assign(p, op.patch, { updated_at: now }); return;
     }
-    case 'setMainProject': (st.projects || []).forEach(p => { p.is_main = p.id === op.id; if (p.is_main) p.status = 'active'; }); return;
+    case 'setMainProject': (st.projects || []).forEach(p => {   // прежний главный уходит в очередь, как на сервере
+      if (p.id === op.id){ p.is_main = true; p.status = 'active'; } else if (p.is_main){ p.is_main = false; if (p.status === 'active') p.status = 'queue'; } }); return;
     case 'deleteProject': st.projects = (st.projects || []).filter(p => p.id !== op.id); return;
     case 'saveStage': {
       if (!st.stages) st.stages = [];
@@ -614,7 +617,7 @@ function applyOp(st, op){
       let proj = 'project_id' in p && !p.project_id ? null : sg ? sg.project_id : ('project_id' in p ? p.project_id : cur.project_id);
       let stg = ('stage_id' in p && !p.stage_id) || ('project_id' in p && !p.project_id) ? null : p.stage_id ? p.stage_id : (proj !== cur.project_id ? null : cur.stage_id);
       let trk = 'track' in p ? (p.track || null) : (proj && !cur.project_id && (cur.track || 'inbox') === 'inbox' ? 'project' : cur.track);
-      Object.assign(t, { project_id: proj, stage_id: stg, track: trk, updated_at: now });
+      Object.assign(t, { project_id: proj, stage_id: stg, track: trk }); if (!op.keep_updated) t.updated_at = now;
       if ('stage_ord' in p) t.stage_ord = p.stage_ord ?? null;
       if ('wait_from' in p) t.wait_from = p.wait_from || null;
       if ('depends_on' in p) t.depends_on = p.depends_on && p.depends_on.length ? p.depends_on.slice() : null;
@@ -1006,7 +1009,7 @@ function focusCard(){
 function commitments(){
   const td = today();
   const C = S.tasks.filter(t => isOpen(t) && t.track === 'commitment');
-  return tops(C).sort((a, b) => isOverdue(b) - isOverdue(a) || (a.due || '9999').localeCompare(b.due || '9999') ||
+  return C.sort((a, b) => isOverdue(b) - isOverdue(a) || (a.due || '9999').localeCompare(b.due || '9999') ||
     ((a.check_date && a.check_date <= td) ? 0 : 1) - ((b.check_date && b.check_date <= td) ? 0 : 1) || byWork(a, b));
 }
 function commRow(t){
@@ -1016,11 +1019,11 @@ function commRow(t){
   if (chk) s.push('пора проверить'); else if (t.status === 'waiting' && t.check_date) s.push('проверить ' + fmtDay(t.check_date));
   if (t.status === 'doing') s.push('в работе');
   if (t.next_step) s.push('→ ' + t.next_step);
-  const n = subsOf(t.id).length;
+  const par = t.parent_id ? taskOf(t.parent_id) : null;
+  if (par) s.push('↳ ' + trunc(par.title, 40));
   return `<div class="wrow ${over ? 'over' : chk ? 'dl' : ''}" data-id="${esc(t.id)}"><span class="star">${over ? '!' : chk ? '🔔' : t.status === 'waiting' ? '⏳' : '•'}</span>
     <div class="t" data-act="edit"><div class="x">${esc(t.title)}</div><div class="s">${esc(s.join(' · ') || areaPath(t.area_id) || 'без срока')}</div></div>
-    ${n ? `<button class="wsub" data-act="wexp" aria-label="Подзадачи">${S.expanded.has(t.id) ? '▾' : '▸'} ${subsOf(t.id).filter(x => x.status === 'done').length}/${n}</button>` : ''}
-    <button class="rowmenu" data-act="move" aria-label="Назначить день">⋯</button></div>${S.expanded.has(t.id) ? subRows(t.id) : ''}`;
+    <button class="rowmenu" data-act="move" aria-label="Назначить день">⋯</button></div>`;
 }
 function viewToday(){
   const td = today();
@@ -1036,6 +1039,10 @@ function viewToday(){
   if (!S.loaded && cfg) return h + `<div class="empty">Загружаю…</div>`;
   const F = focusCard();
   h += F.html;
+  const side = S.projects.filter(x => !x.is_main && x.status !== 'done').map(x => ({ p: x, s: curStage(x.id) })).filter(x => x.s)
+    .map(x => ({ ...x, t: stageInfo(x.s).step })).filter(x => x.t && isOpen(x.t));
+  if (side.length) h += `<div class="sec">Начато вне фокуса<span class="n">${side.length}</span></div><div class="hint">Уже начатую работу можно завершить; новые этапы в этих направлениях не запускаются.</div>
+    <div class="day">${side.map(({ p: x, t }) => `<div class="wrow" data-id="${esc(t.id)}"><span class="star">▶</span><div class="t" data-act="edit"><div class="x">${esc(t.title)}</div><div class="s">${esc(x.title)} · ${STATUS[t.status].toLowerCase()}${t.next_step ? ' · → ' + esc(t.next_step) : ''}</div></div><button class="rowmenu" data-act="open-project" data-v="${esc(x.id)}" aria-label="Открыть проект">›</button></div>`).join('')}</div>`;
   const C = commitments(), cOver = C.filter(isOverdue).length;
   h += `<div class="sec ${cOver ? 'red' : ''}">Обязательства перед клиентами<span class="n">${C.length}</span></div>`;
   h += C.length ? `<div class="day">${C.map(commRow).join('')}</div>`
@@ -1163,16 +1170,21 @@ function projRow(p){
   if (p.owner) sub.push(esc(p.owner));
   return `<div class="prj ${p.is_main ? 'main' : ''}" data-act="open-project" data-v="${esc(p.id)}" role="button" tabindex="0">
     <div class="nm">${p.is_main ? '★ ' : ''}${esc(p.title)}</div>${stageDots(p.id)}<div class="s">${sub.join(' · ')}</div>
-    ${p.needs_review || p.status !== 'active' ? `<div class="meta" style="margin-top:0">${p.status !== 'active' ? `<span class="chip">${PSTATUS[p.status]}</span>` : ''}${p.needs_review ? '<span class="chip amber">требует разбора</span>' : ''}</div>` : ''}</div>`;
+    ${p.needs_review || !p.is_main ? `<div class="meta" style="margin-top:0">${!p.is_main ? `<span class="chip">${PSTATUS[p.status] || p.status}</span>` : ''}${p.needs_review ? '<span class="chip amber">требует разбора</span>' : ''}</div>` : ''}</div>`;
 }
 function viewProjects(){
-  const act = S.projects.filter(p => p.status === 'active').sort(byProject), rest = S.projects.filter(p => p.status !== 'active').sort(byProject);
-  const mp = mainProject();
-  let h = header('Проекты', `${act.length} ${plural(act.length, 'активный', 'активных', 'активных')}${mp ? ' · главный один' : ' · главный не выбран'}`);
+  const mp = mainProject(), others = S.projects.filter(p => p !== mp);
+  const started = others.filter(p => p.status !== 'done' && curStage(p.id)).sort(byProject);
+  const queued = others.filter(p => (p.status === 'queue' || p.status === 'active') && !started.includes(p)).sort(byProject);
+  const rest = others.filter(p => !started.includes(p) && !queued.includes(p)).sort(byProject);
+  let h = header('Проекты', `${mp ? '1 в фокусе' : 'фокус не выбран'} · ${queued.length + started.length} в очереди`);
   if (!S.projects.length) return h + `<div class="empty"><b>🧭</b>Проектов пока нет.<br>Проект — это результат, к которому ведут этапы по порядку: у текущего этапа один шаг и критерий завершения.
     <button class="btn pri" data-act="new-project">＋ Новый проект</button></div>`;
-  h += `<div class="hint">Главный проект — фокус на экране «Сегодня». Остальные направления ведутся по своим маршрутам, но не становятся параллельным фокусом.</div>`;
-  h += act.map(projRow).join('');
+  h += `<div class="hint">Один общий фокус — главный проект. Остальные направления ждут в очереди со своими маршрутами; новые этапы в них не запускаются.</div>`;
+  h += mp ? projRow(mp) : `<div class="slot-empty"><b>Главный фокус не выбран</b>Откройте проект и нажмите «Сделать главным».</div>`;
+  if (started.length) h += `<div class="sec">Начато вне фокуса<span class="n">${started.length}</span></div>` + started.map(projRow).join('');
+  h += `<div class="sec">В очереди<span class="n">${queued.length}</span><button class="toggle" data-act="tg" data-k="pqueue">${S.open.pqueue ? 'скрыть' : 'показать'}</button></div>`;
+  if (S.open.pqueue) h += queued.map(projRow).join('');
   if (rest.length){
     h += `<div class="sec">На паузе и завершённые<span class="n">${rest.length}</span><button class="toggle" data-act="tg" data-k="prest">${S.open.prest ? 'скрыть' : 'показать'}</button></div>`;
     if (S.open.prest) h += rest.map(projRow).join('');
@@ -1182,7 +1194,7 @@ function viewProjects(){
 function stageBlock(s, i){
   const inf = stageInfo(s), key = 'st|' + s.id, open = grpOpen(key, s.status === 'current');
   const all = inf.all, openN = inf.open.length;
-  const lab = s.status === 'done' ? 'завершён' + (s.done_at ? ' ' + dm(isoOf(s.done_at)) : '') : s.status === 'current' ? 'текущий этап' : 'впереди';
+  const lab = s.status === 'done' ? 'завершён' : s.status === 'current' ? 'текущий этап' : 'впереди';
   let h = `<div class="stg ${s.status === 'done' ? 'done' : s.status === 'current' ? 'cur' : ''}" id="stg-${esc(s.id)}">
     <button class="stg-h" data-act="wgrp" data-k="${esc(key)}" data-def="${s.status === 'current' ? 1 : 0}" aria-expanded="${open}">
     <span class="stg-n">${s.status === 'done' ? '✓' : i + 1}</span><span class="nm">${esc(s.title)}<small>${lab}${all.length ? ` · задач: ${openN} открыто из ${all.length}` : ' · задач нет'}${inf.blocked ? ' · ⛔ заблокирован' : ''}${!s.done_criteria && s.status !== 'done' ? ' · нет критерия' : ''}</small></span>
@@ -1788,7 +1800,7 @@ async function editorAddSub(){
 // ================= проекты и этапы =================
 let pj = null;
 function openProjectEditor(p){
-  pj = p ? { ...p } : { id: uid(), _new: true, title: '', goal: '', result: '', owner: '', area_id: null, status: 'active', needs_review: false, notes: '' };
+  pj = p ? { ...p } : { id: uid(), _new: true, title: '', goal: '', result: '', owner: '', area_id: null, status: 'queue', needs_review: false, notes: '' };
   drawProjectEditor();
 }
 function drawProjectEditor(){
@@ -1800,7 +1812,7 @@ function drawProjectEditor(){
     <div class="lbl">Ожидаемый результат <small>— по чему понять, что проект завершён</small></div><textarea class="fld" id="pj-result" rows="3">${esc(p.result || '')}</textarea>
     <div class="lbl">Ответственный <small>— пусто, если не назначен</small></div><input class="fld" id="pj-owner" value="${esc(p.owner || '')}" autocomplete="off">
     <div class="lbl">Полка</div><select class="fld" id="pj-area" aria-label="Полка"><option value="">— не указана —</option>${areaOptions(p.area_id)}</select>
-    <div class="lbl">Статус</div><div class="picks">${Object.entries(PSTATUS).map(([k, l]) => `<button class="pick ${p.status === k ? 'on' : ''}" data-act="pj-status" data-v="${k}">${l}</button>`).join('')}</div>
+    <div class="lbl">Статус</div><div class="picks">${Object.entries(PSTATUS).filter(([k]) => p.is_main ? k !== 'queue' : k !== 'active').map(([k, l]) => `<button class="pick ${p.status === k ? 'on' : ''}" data-act="pj-status" data-v="${k}">${l}</button>`).join('')}</div>
     <label class="chkrow"><input type="checkbox" id="pj-review" ${p.needs_review ? 'checked' : ''}><span class="t">Требует разбора<small>маршрут или связи задач ещё не проверены</small></span></label>
     <div class="lbl">Заметки</div><textarea class="fld" id="pj-notes" rows="3">${esc(p.notes || '')}</textarea>
     <div class="row">${p._new ? `<button class="btn" data-act="close">Отмена</button>` : (!nT && !nS ? `<button class="btn danger" data-act="pj-del">Удалить</button>` : '')}<button class="btn pri" data-act="pj-save">${p._new ? 'Создать' : 'Сохранить'}</button></div>
@@ -1872,7 +1884,9 @@ async function stageDone(sid){
   }
 }
 async function stageCur(sid){
-  const s = stageOf(sid); if (!s) return; const cur = curStage(s.project_id);
+  const s = stageOf(sid); if (!s) return; const cur = curStage(s.project_id), pr = projOf(s.project_id);
+  if (pr && !pr.is_main && !S.tasks.some(t => t.stage_id === sid && t.status === 'doing')){
+    toast('Проект в очереди: новые этапы запускаются только в главном проекте', true); return; }
   if (cur && cur.id !== sid && !(await confirmBox(`Сейчас текущий этап — «${cur.title}». Сделать текущим «${s.title}»? Прежний этап останется незавершённым.`, 'Сделать текущим'))) return;
   S.gopen['st|' + sid] = true;
   commit({ type: 'setStageStatus', id: sid, status: 'current' }, 'Текущий этап выбран');
@@ -1932,7 +1946,7 @@ function previewMigrate(){
   try {
     const plan = window.MIGRATE_V5.plan({ areas: S.areas, tasks: S.tasks, projects: S.projects, stages: S.stages, today: today() }, applyOp);
     for (const op of plan.ops) applyOp(S, JSON.parse(JSON.stringify(op)));
-    window.__pvReport = plan.report; window.__pvOps = plan.ops;
+    window.__pvReport = plan.report; window.__pvOps = plan.ops; window.__pvPlan = plan.plan; window.__pvSnapshot = plan.snapshot;
   } catch (e){ console.error(e); setTimeout(() => toast('Пробная миграция не применилась: ' + e.message, true), 500); }
 }
 function openReport(){
@@ -2201,7 +2215,7 @@ document.addEventListener('click', async e => {
     case 'pj-save': saveProjectEd(); break;
     case 'pj-del': if (await confirmBox(`Удалить пустой проект «${pj.title}»?`)){ const id = pj.id; closeSheet(); commit({ type: 'deleteProject', id }, 'Проект удалён'); go('projects'); } break;
     case 'set-main': { const p = projOf(v); const m = mainProject();
-      if (p && await confirmBox(`Сделать «${p.title}» главным фокусом?${m ? ` «${m.title}» перестанет быть главным, его этапы и задачи сохранятся.` : ''}`, 'Сделать главным')) commit({ type: 'setMainProject', id: v }, 'Главный проект выбран'); break; }
+      if (p && await confirmBox(`Сделать «${p.title}» главным фокусом?${m ? ` «${m.title}» уйдёт в очередь, его этапы и задачи сохранятся.` : ''}`, 'Сделать главным')) commit({ type: 'setMainProject', id: v }, 'Главный проект выбран'); break; }
     case 'new-stage': openStageEditor(null, v); break;
     case 'edit-stage': { const s = stageOf(v); if (s) openStageEditor(s); break; }
     case 'sg-save': saveStageEd(); break;
