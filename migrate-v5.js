@@ -32,6 +32,10 @@ window.MIGRATE_V5 = (() => {
   // Начатая правка сайта — существующая задача, новая не создаётся
   const SITE = { stage: ID(201), stageTitle: 'Оформление мобильного первого экрана', task: '618ae72f-a738-4109-9554-2b9a5fa3281b' };
   const ORDER = { 'Сайт': 10, 'Авито': 20, 'Телефония': 30, 'Отчётность': 40 };
+  // Конкретное действие текущего шага вместо общей формулировки (только если текст не меняли после снимка).
+  // Это лишь текст шага: рабочий обмен CRM ↔ MiniApp и уведомления не включаются.
+  const EDITS = [{ id: 'b3a57e17-9aa8-4ef9-b72a-32bcb0868526', next_step_from: 'Проверить текущий результат и выбрать конкретный следующий шаг',
+    next_step_to: 'Выбрать согласованную реальную бронь и провести контролируемую проверку обмена CRM ↔ MiniApp' }];
   const NOTES = { '00102219-9641-4ea9-8477-376937234bb3': 'возможно, относится к этапу «Связка amoCRM и мини-приложения» — оставлено в очереди CRM' };
   const KEEP = ['title', 'notes', 'status', 'priority', 'due', 'plan_date', 'plan_order', 'parent_id', 'area_id', 'done_at', 'created_at', 'updated_at',
     'next_step', 'done_criteria', 'wait_for', 'unblock_action', 'check_date', 'rental_id', 'template_step'];
@@ -81,7 +85,9 @@ window.MIGRATE_V5 = (() => {
     const routes = [], already = [];
     for (const [id, r] of route){ const t = byId.get(id); if (legacy(t)) routes.push({ id, ...r }); else already.push(t.title); }
     const snapshot = T0.reduce((m, t) => (t.updated_at && t.updated_at > m ? t.updated_at : m), '');
-    const sqlPlan = { projects, stages, routes, next, main: MAIN.id };
+    const edits = EDITS.filter(e => byId.has(e.id) && (byId.get(e.id).next_step || null) === e.next_step_from);
+    const editsSkipped = EDITS.filter(e => !edits.includes(e)).map(e => byId.has(e.id) ? byId.get(e.id).title + ' — текст шага уже другой' : e.id + ' — задача не найдена');
+    const sqlPlan = { projects, stages, routes, next, main: MAIN.id, edits };
 
     // операции для показа в приложении (та же логика, что tm_migrate_v5)
     const ops = [];
@@ -90,12 +96,15 @@ window.MIGRATE_V5 = (() => {
     stages.forEach(s => { const { id, project_id, status, ...patch } = s; ops.push({ type: 'saveStage', id, project_id, patch }); if (status !== 'todo') ops.push({ type: 'setStageStatus', id, status }); });
     routes.forEach(r => { const { id, ...patch } = r; ops.push({ type: 'routeTask', id, patch, with_subtasks: false, keep_updated: true }); });
     next.forEach(n => ops.push({ type: 'saveStage', id: n.stage_id, project_id: (stages.find(s => s.id === n.stage_id) || {}).project_id, patch: { next_task_id: n.task_id } }));
+    edits.forEach(e => ops.push({ type: 'updateTask', id: e.id, patch: { next_step: e.next_step_to } }));
 
     // пробное применение на копии и отчёт до/после
     const st = JSON.parse(JSON.stringify({ areas: data.areas || [], tasks: T0, projects: data.projects || [], stages: data.stages || [], rentals: [] }));
     for (const op of ops) applyOp(st, JSON.parse(JSON.stringify(op)));
     const T1 = st.tasks, m1 = new Map(T1.map(t => [t.id, t]));
-    const keepBroken = T0.filter(t => { const x = m1.get(t.id); return !x || KEEP.some(k => JSON.stringify(t[k] ?? null) !== JSON.stringify(x[k] ?? null)); });
+    // запланированная правка шага — единственное разрешённое изменение (next_step и updated_at этой задачи)
+    const edited = new Set(edits.map(e => e.id));
+    const keepBroken = T0.filter(t => { const x = m1.get(t.id); return !x || KEEP.some(k => (edited.has(t.id) && (k === 'next_step' || k === 'updated_at')) ? false : JSON.stringify(t[k] ?? null) !== JSON.stringify(x[k] ?? null)); });
     const idsSame = T0.length === T1.length && T0.every(t => m1.has(t.id));
     const cnt = (arr, f) => arr.reduce((o, t) => { const k = f(t); o[k] = (o[k] || 0) + 1; return o; }, {});
     const subsKept = T0.filter(t => t.parent_id).every(t => (m1.get(t.id) || {}).parent_id === t.parent_id);
@@ -112,6 +121,7 @@ window.MIGRATE_V5 = (() => {
     const report = {
       snapshot, before: { tasks: T0.length, status: cnt(T0, t => t.status), projects: (data.projects || []).length, stages: (data.stages || []).length },
       after: { tasks: T1.length, status: cnt(T1, t => t.status), projects: st.projects.length, stages: st.stages.length },
+      edits: edits.map(e => [byId.get(e.id).title, e.next_step_from, e.next_step_to]), editsSkipped,
       routes: routes.length, idsSame, subsKept, keepBroken: keepBroken.map(t => t.title), already, missing,
       byTrack: cnt(T1, t => t.track || 'без маршрута'), projects: projView,
       commitments: commitments.map(t => [t.title, t.parent_id && m1.get(t.parent_id) ? m1.get(t.parent_id).title : '', t.status]),
@@ -142,8 +152,9 @@ window.MIGRATE_V5 = (() => {
       <div class="status-box">Снимок данных: ${esc(r.snapshot ? new Date(r.snapshot).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) : '—')} (МСК, последнее изменение в снимке).<br>
         Записей задач: ${r.before.tasks} → ${r.after.tasks}. Статусы до: ${stat(r.before.status)}; после: ${stat(r.after.status)}.<br>
         Проектов: ${r.before.projects} → ${r.after.projects}, этапов: ${r.before.stages} → ${r.after.stages}. Маршрут получат: ${r.routes} задач (каждая отдельно).<br>
+        ${r.edits.map(([t, a, b]) => `Правка текста шага «${esc(t)}»: «${esc(a)}» → «${esc(b)}».<br>`).join('')}${r.editsSkipped.map(x => `Правка шага не выполнится: ${esc(x)}.<br>`).join('')}
         ${ok(r.idsSame, 'id те же, новых задач нет', 'набор id изменился')} · ${ok(r.subsKept, 'подзадачи на месте', 'подзадачи изменились')} ·
-        ${ok(!r.keepBroken.length, 'сроки, статусы, заметки, планы и история не меняются', 'изменятся поля: ' + r.keepBroken.length)}</div>
+        ${ok(!r.keepBroken.length, 'сроки, статусы, заметки, планы и история не меняются (кроме правки шага выше)', 'изменятся поля: ' + r.keepBroken.length)}</div>
       <details open><summary>Главный фокус и направления</summary>${r.projects.map(p => `<div style="margin:8px 0"><b>${p.main ? '★ ' : ''}${esc(p.title)}</b> <span class="chip ${p.main ? 'accent' : ''}">${PS[p.status] || p.status}</span>${p.review ? ' <span class="chip amber">требует разбора</span>' : ''}
         ${p.stages.length ? `<ol>${p.stages.map(s => `<li>${esc(s.title)} — ${ST[s.status]}<br><small>${s.crit ? 'Готово, когда: ' + esc(s.crit) : '<span class="warn">критерий не задан</span>'}</small>${s.notes ? `<br><small>${esc(s.notes)}</small>` : ''}${s.tasks.length ? `<br><small>${s.tasks.map(t => (t.next ? '➜ ' : '') + esc(t.title) + ' (' + TS[t.status] + ')').join('; ')}</small>` : ''}</li>`).join('')}</ol>` : ''}
         <div class="hint" style="margin:2px 0">${p.stages.length ? '' : 'маршрут не составлен · '}очередь: ${p.queue} · выполнено: ${p.history} · всего с подзадачами: ${p.all}</div></div>`).join('')}</details>
